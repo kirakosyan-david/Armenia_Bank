@@ -1,0 +1,32 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+
+    <changeSet id="009-create-user-profiles-table" author="David Kirakosyan">
+
+        <sql>
+            CREATE TABLE user_profiles
+            (
+                user_id            UUID PRIMARY KEY,
+                first_name         VARCHAR(255),
+                last_name          VARCHAR(255),
+                patronymic         VARCHAR(255),
+                birth_date         DATE,
+                gender             user_profile_gender DEFAULT 'OTHER' NOT NULL,
+                phone_number       VARCHAR(50),
+                address            VARCHAR(500),
+                photo_url          VARCHAR(500),
+                nationality        VARCHAR(100),
+                citizenship        VARCHAR(100),
+                timezone           VARCHAR(100),
+                preferred_language VARCHAR(100),
+                CONSTRAINT fk_user_profiles_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            );
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>

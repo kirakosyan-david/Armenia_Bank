@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="005-create-verification-rejection-reason-type" author="David Kirakosyan">
+        <sql>
+            CREATE TYPE  verification_rejection_reason AS ENUM ('REJECTED', 'NEED_MORE_INFO');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

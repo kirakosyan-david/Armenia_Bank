@@ -1,0 +1,19 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd
+                   http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <include file="/db/migration/changelog/001-create-user-role-type.xml"/>
+    <include file="/db/migration/changelog/002-create-user-profile-gender-type.xml"/>
+    <include file="/db/migration/changelog/003-create-verification-status-type.xml"/>
+    <include file="/db/migration/changelog/004-create-verification-document-type.xml"/>
+    <include file="/db/migration/changelog/005-create-verification-rejection-reason-type.xml"/>
+    <include file="/db/migration/changelog/006-create-verification-method-type.xml"/>
+    <include file="/db/migration/changelog/007-create-verification-verifier-type.xml"/>
+    <include file="/db/migration/changelog/008-create-users-table.xml"/>
+    <include file="/db/migration/changelog/009-create-user-profiles-table.xml"/>
+    <include file="/db/migration/changelog/010-create-user-verification-table.xml"/>
+
+
+</databaseChangeLog>
