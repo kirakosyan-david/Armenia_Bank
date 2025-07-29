@@ -1,9 +1,15 @@
 server:
-  port: 8080
+  port: 8085
 
 spring:
   application:
     name: auth-service
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://backend-keycloak-auth:8080/auth/realms/ArmeniaBank
 
   datasource:
     url: jdbc:postgresql://localhost:5432/auth-service
@@ -25,10 +31,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-jwt:
-  secret: YmJieXZmaHRkZHZoO2lvdWJ2NHNhemF6d2prJ2xbcGk4eWRlc3J0Zmhsb2tsW3BwbHBvb2ZnaGdkaHNnd3NlZnc=
-  expiration: 600000
 
 springdoc:
   api-docs:

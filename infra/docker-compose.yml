@@ -48,19 +48,44 @@ services:
     image: confluentinc/cp-kafka:7.3.0
     depends_on:
       - kafka
-    entrypoint: [ "/bin/sh", "-c" ]
-    command: |
-      "
+    entrypoint: /bin/sh
+    command: -c "
       echo '⏳ Waiting for Kafka...';
       sleep 10;
       echo '📦 Creating topics...';
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic audit-events --replication-factor 1 --partitions 1;
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic auth-events --replication-factor 1 --partitions 1;
-      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic notification-events --replication-factor 1 --partitions 1;
-      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic wallet-events --replication-factor 1 --partitions 1;
-      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic document-events --replication-factor 1 --partitions 1;
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic gateway-topic --replication-factor 1 --partitions 1;
       echo '✅ Done.';
-      "      
+      "
+    networks:
+      - my-network
+
+  backend-keycloak-auth:
+    image: quay.io/keycloak/keycloak:24.0.4
+    container_name: backend-keycloak-auth
+    command: start-dev --import-realm --import-realm-path=/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - my-network
+
+  backend-gateway-client:
+    build:
+      context: ../gateway-service
+    container_name: backend-gateway-client
+    depends_on:
+      - backend-keycloak-auth
+      - auth-service
+    ports:
+      - "9090:9090"
+    networks:
+      - my-network
 
   audit-service:
     build:
@@ -85,6 +110,7 @@ services:
       context: ../auth-service
     container_name: auth-service
     depends_on:
+      - backend-keycloak-auth
       - postgres
       - kafka
       - audit-service
