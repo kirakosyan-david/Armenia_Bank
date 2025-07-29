@@ -20,6 +20,12 @@ spring:
     change-log: classpath:/db/migration/changelog.xml
     clear-checksums: true
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 jwt:
   secret: YmJieXZmaHRkZHZoO2lvdWJ2NHNhemF6d2prJ2xbcGk4eWRlc3J0Zmhsb2tsW3BwbHBvb2ZnaGdkaHNnd3NlZnc=
   expiration: 600000
@@ -32,3 +38,7 @@ springdoc:
   swagger-ui.operations-sorter: alpha
   swagger-configurations:
     - classpath:/openapi.yaml
+
+kafka:
+  topic:
+    auth-events: auth-events

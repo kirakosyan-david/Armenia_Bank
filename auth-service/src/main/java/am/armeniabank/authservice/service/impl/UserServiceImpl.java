@@ -1,5 +1,6 @@
 package am.armeniabank.authservice.service.impl;
 
+import am.armeniabank.authservice.dto.AuditEventDto;
 import am.armeniabank.authservice.dto.UserDto;
 import am.armeniabank.authservice.dto.UserRegistrationRequest;
 import am.armeniabank.authservice.dto.UserUpdateRequest;
@@ -17,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -33,11 +36,16 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final WebClient auditWebClient;
+
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserDto register(UserRegistrationRequest register) {
+        log.info("Attempting to register user using email: {}", register.getEmail());
+
         if (userRepository.existsByEmail(register.getEmail())) {
+            log.warn("Registration failed - email address already in use: {}", register.getEmail());
             throw new RuntimeException("Email already used");
         }
         User user = User.builder()
@@ -57,8 +65,13 @@ public class UserServiceImpl implements UserService {
 
         user.setProfile(userProfile);
         userRepository.save(user);
+        log.info("User successfully registered with ID: {}", user.getId());
 
-        return userMapper.toDto(user, userProfile);
+        UserDto userDto = userMapper.toDto(user, userProfile);
+
+        sendAuditEvent(userDto);
+
+        return userDto;
     }
 
 
@@ -106,4 +119,19 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(UUID userId) {
 
     }
+
+    private void sendAuditEvent(UserDto userDto) {
+        auditWebClient.post()
+                .uri("/audit")
+                .bodyValue(new AuditEventDto(
+                        "auth-service",
+                        "USER_REGISTERED",
+                        "User registered with email: " + userDto.getEmail(),
+                        LocalDateTime.now()
+                ))
+                .retrieve()
+                .bodyToMono(Void.class)
+                .subscribe();
+    }
+
 }
