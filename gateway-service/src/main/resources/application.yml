@@ -30,7 +30,7 @@ spring:
             - StripPrefix=2
 
         - id: auth-service
-          uri: http://auth-service:8080
+          uri: http://auth-service:8085
           predicates:
             - Path=/api/auth/**
           filters:

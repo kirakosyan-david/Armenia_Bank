@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/audit-service
-    username: audit-service
-    password: audit-service
+    url: jdbc:postgresql://localhost:5432/audit_service
+    username: audit_service
+    password: audit_service
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -21,11 +21,13 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: audit-service
+      group-id: my-group
+      auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: '*'
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 kafka:
   topic:

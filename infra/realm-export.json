@@ -1,0 +1,88 @@
+{
+  "id": "ArmeniaBank",
+  "realm": "ArmeniaBank",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "backend-gateway-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "gateway-service",
+      "redirectUris": [
+        "http://localhost:9090/*"
+      ],
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "auth-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "auth-service",
+      "redirectUris": [],
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "audit-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "audit-service",
+      "redirectUris": [],
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin"
+      },
+      {
+        "name": "user"
+      },
+      {
+        "name": "audit"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ]
+    },
+    {
+      "username": "auditUser",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "audit123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "audit"
+      ]
+    }
+  ]
+}
