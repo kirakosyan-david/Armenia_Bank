@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8080
 
 spring:
   application:
@@ -44,3 +44,6 @@ springdoc:
 kafka:
   topic:
     auth-events: auth-events
+
+audit-service:
+  url: http://audit-service:8083

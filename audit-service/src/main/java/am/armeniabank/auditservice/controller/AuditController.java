@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/audit")
+@RequestMapping("/api/audit")
 @RequiredArgsConstructor
 public class AuditController {
 

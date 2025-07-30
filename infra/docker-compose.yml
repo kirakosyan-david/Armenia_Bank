@@ -102,6 +102,13 @@ services:
       SPRING_DATASOURCE_PASSWORD: audit-service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC_AUDIT_EVENTS: audit-events
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
     networks:
       - my-network
 
@@ -120,7 +127,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth-service
       SPRING_DATASOURCE_USERNAME: auth-service
       SPRING_DATASOURCE_PASSWORD: auth-service
-      AUDIT_SERVICE_URL: http://audit-service:8082
+      AUDIT_SERVICE_URL: http://audit-service:8083
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:
       - my-network

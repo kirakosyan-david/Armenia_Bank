@@ -1,5 +1,6 @@
 package am.armeniabank.authservice.service.impl;
 
+import am.armeniabank.authservice.cilent.AuditClient;
 import am.armeniabank.authservice.dto.AuditEventDto;
 import am.armeniabank.authservice.dto.UserDto;
 import am.armeniabank.authservice.dto.UserRegistrationRequest;
@@ -14,6 +15,7 @@ import am.armeniabank.authservice.repository.UserRepository;
 import am.armeniabank.authservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -36,7 +38,9 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final WebClient auditWebClient;
+    private final AuditClient auditClient;
+
+
 
 
     @Override
@@ -69,7 +73,15 @@ public class UserServiceImpl implements UserService {
 
         UserDto userDto = userMapper.toDto(user, userProfile);
 
-        sendAuditEvent(userDto);
+        AuditEventDto auditEvent = new AuditEventDto(
+                "auth-service",
+                "USER_REGISTERED",
+                "User registered with email: " + userDto.getEmail(),
+                LocalDateTime.now()
+        );
+
+        auditClient.sendAuditEvent(auditEvent)
+                .subscribe();
 
         return userDto;
     }
@@ -118,20 +130,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(UUID userId) {
 
-    }
-
-    private void sendAuditEvent(UserDto userDto) {
-        auditWebClient.post()
-                .uri("/audit")
-                .bodyValue(new AuditEventDto(
-                        "auth-service",
-                        "USER_REGISTERED",
-                        "User registered with email: " + userDto.getEmail(),
-                        LocalDateTime.now()
-                ))
-                .retrieve()
-                .bodyToMono(Void.class)
-                .subscribe();
     }
 
 }
