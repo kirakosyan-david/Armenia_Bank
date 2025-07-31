@@ -1,6 +1,6 @@
 package am.armeniabank.authservice.dto;
 
-import am.armeniabank.authservice.entity.emuns.UserRoles;
+import am.armeniabank.authservice.entity.emuns.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ public class UserResponseDto {
     private String passportNumber;
     private boolean emailVerified;
     private boolean enabled;
-    private UserRoles role;
+    private UserRole role;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 }

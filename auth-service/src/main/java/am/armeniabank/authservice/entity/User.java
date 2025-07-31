@@ -1,6 +1,6 @@
 package am.armeniabank.authservice.entity;
 
-import am.armeniabank.authservice.entity.emuns.UserRoles;
+import am.armeniabank.authservice.entity.emuns.UserRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,9 +47,9 @@ public class User {
     @Column(unique = true)
     private String passportNumber;
 
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private UserRoles role;
+    private UserRole role;
 
     private boolean enabled;
 

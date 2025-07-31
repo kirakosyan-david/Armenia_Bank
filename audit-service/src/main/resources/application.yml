@@ -1,9 +1,9 @@
 server:
-  port: 8083
+  port: 8082
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/audit_service
+    url: jdbc:postgresql://postgres:5432/audit_service
     username: audit_service
     password: audit_service
     driver-class-name: org.postgresql.Driver
@@ -19,7 +19,7 @@ spring:
     clear-checksums: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: my-group
       auto-offset-reset: earliest
@@ -32,6 +32,9 @@ spring:
 kafka:
   topic:
     audit-events: audit-events
+
+archive:
+  audit: D:/Test_Task/Armenia_Bank/archive/audit_
 
 audit-service:
   base-url: http://audit-service:8082

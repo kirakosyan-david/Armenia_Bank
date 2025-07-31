@@ -1,6 +1,6 @@
 package am.armeniabank.authservice.dto;
 
-import am.armeniabank.authservice.entity.emuns.UserRoles;
+import am.armeniabank.authservice.entity.emuns.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,5 +15,5 @@ public class UpdateUserDto {
     private String email;
     private String passportNumber;
     private Boolean enabled;
-    private UserRoles role;
+    private UserRole role;
 }

@@ -1,5 +1,6 @@
 package am.armeniabank.auditservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,5 +33,7 @@ public class AuditEvent {
     private String service;
     private String eventType;
     private String details;
+
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime createdAt;
 }

@@ -1,6 +1,6 @@
 package am.armeniabank.authservice.entity.emuns;
 
-public enum UserRoles {
+public enum UserRole {
 
     USER,
     ADMIN

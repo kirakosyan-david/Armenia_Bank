@@ -4,6 +4,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class WebClientConfig {
 
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakBaseUrl;
 
     @Bean
     public WebClient auditWebClient() {
@@ -41,10 +44,10 @@ public class WebClientConfig {
                 );
 
         return WebClient.builder()
-                .baseUrl("https://api.bank.example") // можешь не указывать, если динамично
+                .baseUrl(keycloakBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .filter(logRequest()) // логирование запросов
-                .filter(logResponse()) // логирование ответов
+                .filter(logRequest())
+                .filter(logResponse())
                 .build();
     }
 

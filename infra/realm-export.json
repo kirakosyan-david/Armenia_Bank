@@ -2,6 +2,21 @@
   "id": "ArmeniaBank",
   "realm": "ArmeniaBank",
   "enabled": true,
+  "displayName": "Armenia Bank Realm",
+  "loginTheme": "keycloak",
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "editUsernameAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "defaultDefaultClientScopes": [
+    "profile",
+    "email",
+    "roles",
+    "web-origins"
+  ],
   "clients": [
     {
       "clientId": "backend-gateway-client",
@@ -12,10 +27,15 @@
       "redirectUris": [
         "http://localhost:9090/*"
       ],
+      "webOrigins": ["+"],
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": true,
       "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": true
+      "directAccessGrantsEnabled": true,
+      "attributes": {
+        "access.token.lifespan": "300",
+        "refresh.token.lifespan": "1800"
+      }
     },
     {
       "clientId": "auth-service",
@@ -24,10 +44,15 @@
       "publicClient": false,
       "secret": "auth-service",
       "redirectUris": [],
+      "webOrigins": ["+"],
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": true,
       "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": true
+      "directAccessGrantsEnabled": true,
+      "attributes": {
+        "access.token.lifespan": "300",
+        "refresh.token.lifespan": "1800"
+      }
     },
     {
       "clientId": "audit-service",
@@ -36,29 +61,52 @@
       "publicClient": false,
       "secret": "audit-service",
       "redirectUris": [],
+      "webOrigins": ["+"],
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": true,
       "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": true
+      "directAccessGrantsEnabled": true,
+      "attributes": {
+        "access.token.lifespan": "300",
+        "refresh.token.lifespan": "1800"
+      }
     }
   ],
   "roles": {
     "realm": [
       {
-        "name": "admin"
+        "name": "admin",
+        "description": "Administrator role"
       },
       {
-        "name": "user"
+        "name": "user",
+        "description": "Regular user role"
       },
       {
-        "name": "audit"
+        "name": "audit",
+        "description": "Audit logger role"
+      },
+      {
+        "name": "realm-management/manage-users",
+        "description": "Manage users via Admin API"
       }
-    ]
+    ],
+    "client": {
+      "auth-service": [
+        {
+          "name": "service-role",
+          "description": "Auth-service role"
+        }
+      ]
+    }
   },
   "users": [
     {
       "username": "admin",
       "enabled": true,
+      "email": "admin@armeniabank.com",
+      "firstName": "Admin",
+      "lastName": "User",
       "credentials": [
         {
           "type": "password",
@@ -67,12 +115,17 @@
         }
       ],
       "realmRoles": [
-        "admin"
-      ]
+        "admin",
+        "realm-management/manage-users"
+      ],
+      "emailVerified": true
     },
     {
       "username": "auditUser",
       "enabled": true,
+      "email": "audituser@armeniabank.com",
+      "firstName": "Audit",
+      "lastName": "User",
       "credentials": [
         {
           "type": "password",
@@ -82,7 +135,29 @@
       ],
       "realmRoles": [
         "audit"
-      ]
+      ],
+      "emailVerified": true
+    },
+    {
+      "username": "user@example.com",
+      "enabled": true,
+      "email": "user@example.com",
+      "firstName": "User",
+      "lastName": "Example",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "emailVerified": true,
+      "attributes": {
+        "locale": "en"
+      }
     }
   ]
 }

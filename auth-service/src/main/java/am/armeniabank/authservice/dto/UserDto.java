@@ -1,12 +1,11 @@
 package am.armeniabank.authservice.dto;
 
-import am.armeniabank.authservice.entity.emuns.UserRoles;
+import am.armeniabank.authservice.entity.emuns.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -19,7 +18,7 @@ public class UserDto {
     private String email;
     private String passportNumber;
     private boolean emailVerified;
-    private UserRoles role;
+    private UserRole role;
     private String firstName;
     private String lastName;
 }

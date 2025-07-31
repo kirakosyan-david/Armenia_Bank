@@ -1,9 +1,7 @@
 package am.armeniabank.authservice.dto;
 
-import am.armeniabank.authservice.entity.emuns.UserRoles;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

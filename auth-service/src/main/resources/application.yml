@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8081
 
 spring:
   application:
@@ -11,7 +11,7 @@ spring:
           issuer-uri: http://backend-keycloak-auth:8080/realms/ArmeniaBank
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_service
+    url: jdbc:postgresql://postgres:5432/auth_service
     username: auth_service
     password: auth_service
     driver-class-name: org.postgresql.Driver
@@ -28,7 +28,7 @@ spring:
     clear-checksums: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: my-group
       auto-offset-reset: earliest
@@ -52,4 +52,13 @@ kafka:
     auth-events: auth-events
 
 audit-service:
-  url: http://audit-service:8083
+  url: http://audit-service:8082
+
+
+keycloak:
+#  base-url: http://backend-keycloak-auth:8080/realms/ArmeniaBank
+  token-uri: /realms/ArmeniaBank/protocol/openid-connect/token
+  auth-server-url: http://backend-keycloak-auth:8080
+  realm: ArmeniaBank
+  client-id: auth-service
+  client-secret: auth-service
