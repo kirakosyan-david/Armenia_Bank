@@ -4,7 +4,6 @@ import am.armeniabank.authservice.cilent.AuditClient;
 import am.armeniabank.authservice.dto.AuditEventDto;
 import am.armeniabank.authservice.dto.LoginRequestDto;
 import am.armeniabank.authservice.dto.TokenResponseDto;
-import am.armeniabank.authservice.repository.UserRepository;
 import am.armeniabank.authservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

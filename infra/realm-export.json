@@ -75,16 +75,12 @@
   "roles": {
     "realm": [
       {
-        "name": "admin",
+        "name": "ROLE_ADMIN",
         "description": "Administrator role"
       },
       {
-        "name": "user",
+        "name": "ROLE_USER",
         "description": "Regular user role"
-      },
-      {
-        "name": "audit",
-        "description": "Audit logger role"
       },
       {
         "name": "realm-management/manage-users",
@@ -99,65 +95,5 @@
         }
       ]
     }
-  },
-  "users": [
-    {
-      "username": "admin",
-      "enabled": true,
-      "email": "admin@armeniabank.com",
-      "firstName": "Admin",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "admin",
-          "temporary": false
-        }
-      ],
-      "realmRoles": [
-        "admin",
-        "realm-management/manage-users"
-      ],
-      "emailVerified": true
-    },
-    {
-      "username": "auditUser",
-      "enabled": true,
-      "email": "audituser@armeniabank.com",
-      "firstName": "Audit",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "audit123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": [
-        "audit"
-      ],
-      "emailVerified": true
-    },
-    {
-      "username": "user@example.com",
-      "enabled": true,
-      "email": "user@example.com",
-      "firstName": "User",
-      "lastName": "Example",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "user123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": [
-        "user"
-      ],
-      "emailVerified": true,
-      "attributes": {
-        "locale": "en"
-      }
-    }
-  ]
+  }
 }

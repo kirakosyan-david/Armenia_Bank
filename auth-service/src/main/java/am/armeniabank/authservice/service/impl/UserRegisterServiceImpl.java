@@ -6,10 +6,15 @@ import am.armeniabank.authservice.dto.UserDto;
 import am.armeniabank.authservice.dto.UserRegistrationRequest;
 import am.armeniabank.authservice.entity.User;
 import am.armeniabank.authservice.entity.UserProfile;
+import am.armeniabank.authservice.entity.UserVerification;
+import am.armeniabank.authservice.entity.emuns.DocumentType;
 import am.armeniabank.authservice.entity.emuns.Gender;
+import am.armeniabank.authservice.entity.emuns.RejectionReason;
 import am.armeniabank.authservice.entity.emuns.UserRole;
+import am.armeniabank.authservice.entity.emuns.VerificationMethod;
+import am.armeniabank.authservice.entity.emuns.VerificationStatus;
+import am.armeniabank.authservice.entity.emuns.VerifierType;
 import am.armeniabank.authservice.mapper.UserMapper;
-import am.armeniabank.authservice.repository.UserProfileRepository;
 import am.armeniabank.authservice.repository.UserRepository;
 import am.armeniabank.authservice.service.UserRegisterService;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +75,6 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         User user = User.builder()
                 .email(register.getEmail())
                 .password(passwordEncoder.encode(register.getPassword()))
-                .passportNumber(register.getPassportNumber())
                 .role(UserRole.USER)
                 .emailVerified(true)
                 .build();
@@ -78,14 +82,26 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         UserProfile profile = UserProfile.builder()
                 .firstName(register.getFirstName())
                 .lastName(register.getLastName())
+                .patronymic(register.getPatronymic())
                 .gender(Gender.OTHER)
                 .user(user)
                 .build();
 
+        UserVerification verification = UserVerification.builder()
+                .status(VerificationStatus.PENDING)
+                .passportNumber(register.getPassportNumber())
+                .documentType(DocumentType.PASSPORT)
+                .rejectionReason(RejectionReason.REJECTED)
+                .verificationMethod(VerificationMethod.MAIL)
+                .verifiedByType(VerifierType.HUMAN)
+                .user(user)
+                .build();
+
         user.setProfile(profile);
+        user.setVerification(verification);
         userRepository.save(user);
 
-        createUserInKeycloak(register);
+        createUserInKeycloak(register, user.getRole());
 
         AuditEventDto auditEvent = new AuditEventDto(
                 "auth-service",
@@ -96,7 +112,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 
         auditClient.sendAuditEvent(auditEvent);
 
-        return userMapper.toDto(user, profile);
+        return userMapper.toDto(user, profile, verification);
     }
 
     private boolean emailExistsInKeycloak(String email) {
@@ -116,9 +132,10 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         return response.getBody() != null && !response.getBody().isEmpty();
     }
 
-    private void createUserInKeycloak(UserRegistrationRequest register) {
+    private void createUserInKeycloak(UserRegistrationRequest register, UserRole role) {
         String accessToken = getAdminAccessToken();
 
+        // 1. Создание пользователя
         Map<String, Object> payload = new HashMap<>();
         payload.put("username", register.getEmail());
         payload.put("email", register.getEmail());
@@ -137,12 +154,45 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-        restTemplate.postForEntity(
+
+        ResponseEntity<Void> response = restTemplate.postForEntity(
                 keycloakBaseUrl + "/admin/realms/" + realm + "/users",
                 request,
                 Void.class
         );
+
+        String location = response.getHeaders().getFirst("Location");
+        if (location == null || !location.contains("/")) {
+            throw new RuntimeException("Failed to retrieve user ID from Keycloak response");
+        }
+
+        String userId = location.substring(location.lastIndexOf("/") + 1);
+        log.info("Keycloak user created with ID: {}", userId);
+
+        String roleName = (role == UserRole.ADMIN) ? "ROLE_ADMIN" : "ROLE_USER";
+        HttpEntity<Void> getRoleRequest = new HttpEntity<>(headers);
+        ResponseEntity<Map> roleResponse = restTemplate.exchange(
+                keycloakBaseUrl + "/admin/realms/" + realm + "/roles/" + roleName,
+                HttpMethod.GET,
+                getRoleRequest,
+                Map.class
+        );
+
+        Map<String, Object> roleMap = roleResponse.getBody();
+        if (roleMap == null || roleMap.isEmpty()) {
+            throw new RuntimeException("Failed to retrieve role: " + roleName);
+        }
+
+        HttpEntity<List<Map<String, Object>>> assignRoleRequest =
+                new HttpEntity<>(List.of(roleMap), headers);
+
+        restTemplate.postForEntity(
+                keycloakBaseUrl + "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/realm",
+                assignRoleRequest,
+                Void.class
+        );
     }
+
 
     private String getAdminAccessToken() {
         HttpHeaders headers = new HttpHeaders();

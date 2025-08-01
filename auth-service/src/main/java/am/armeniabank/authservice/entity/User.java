@@ -44,9 +44,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(unique = true)
-    private String passportNumber;
-
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;

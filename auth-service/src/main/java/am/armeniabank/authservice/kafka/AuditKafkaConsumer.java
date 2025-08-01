@@ -12,6 +12,5 @@ public class AuditKafkaConsumer {
     @KafkaListener(topics = "${kafka.topic.auth-events}", groupId = "auth-service")
     public void consumeAuditEvent(AuditEventDto event) {
         log.info("Получено audit-событие: {}", event);
-        // сохранить в базу, логировать и т.п.
     }
 }

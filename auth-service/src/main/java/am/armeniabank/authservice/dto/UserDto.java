@@ -21,4 +21,5 @@ public class UserDto {
     private UserRole role;
     private String firstName;
     private String lastName;
+    private String patronymic;
 }

@@ -1,13 +1,14 @@
 package am.armeniabank.authservice.service;
 
 import am.armeniabank.authservice.dto.UserDto;
+import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.dto.UserUpdateRequest;
 
 import java.util.UUID;
 
 public interface UserService {
 
-    UserDto findByEmail(String email);
+    UserEmailSearchResponseDto searchByEmail(String email);
 
     UserDto findById(UUID id);
 

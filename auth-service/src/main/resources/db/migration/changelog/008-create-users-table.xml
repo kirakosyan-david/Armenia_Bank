@@ -1,31 +1,30 @@
-<databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <databaseChangeLog
+            xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet id="008-create-users-table" author="David Kirakosyan">
+        <changeSet id="008-create-users-table" author="David Kirakosyan">
 
-        <sql>
+            <sql>
 
-            CREATE TABLE users (
-                                   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                                   email VARCHAR(255) NOT NULL UNIQUE,
-                                   password VARCHAR(255) NOT NULL,
-                                   passport_number VARCHAR(255) UNIQUE,
-                                   role user_role NOT NULL,
-                                   enabled BOOLEAN,
-                                   email_verified BOOLEAN,
-                                   last_login_at TIMESTAMP,
-                                   created_at TIMESTAMP,
-                                   updated_at TIMESTAMP,
-                                   password_reset_token VARCHAR(255),
-                                   password_reset_token_expiry TIMESTAMP,
-                                   account_locked_until TIMESTAMP,
-                                   lock_reason VARCHAR(255)
-            );
-        </sql>
+                CREATE TABLE users (
+                                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                       email VARCHAR(255) NOT NULL UNIQUE,
+                                       password VARCHAR(255) NOT NULL,
+                                       role user_role NOT NULL,
+                                       enabled BOOLEAN,
+                                       email_verified BOOLEAN,
+                                       last_login_at TIMESTAMP,
+                                       created_at TIMESTAMP,
+                                       updated_at TIMESTAMP,
+                                       password_reset_token VARCHAR(255),
+                                       password_reset_token_expiry TIMESTAMP,
+                                       account_locked_until TIMESTAMP,
+                                       lock_reason VARCHAR(255)
+                );
+            </sql>
 
-    </changeSet>
+        </changeSet>
 
-</databaseChangeLog>
+    </databaseChangeLog>

@@ -3,6 +3,7 @@ package am.armeniabank.authservice.controller;
 import am.armeniabank.authservice.dto.LoginRequestDto;
 import am.armeniabank.authservice.dto.TokenResponseDto;
 import am.armeniabank.authservice.dto.UserDto;
+import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.dto.UserRegistrationRequest;
 import am.armeniabank.authservice.service.AuthService;
 import am.armeniabank.authservice.service.UserRegisterService;
@@ -13,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,6 +30,7 @@ public class AuthController {
 
     private final UserRegisterService userRegisterService;
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegistrationRequest register) {
@@ -49,6 +53,17 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Login failed for user {}: {}", login.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<UserEmailSearchResponseDto> searchEmail(@RequestParam String email){
+        try {
+            UserEmailSearchResponseDto searchByEmail = userService.searchByEmail(email);
+            return ResponseEntity.ok(searchByEmail);
+        }catch (Exception e){
+            log.error("Email failed for user {}: {}", email, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
