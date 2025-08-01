@@ -9,25 +9,29 @@ import am.armeniabank.authservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
-
     private final AuditClient auditClient;
 
-    private final WebClient webClient;
+    private final RestTemplate restTemplate;
+
+    @Value("${keycloak.base-url}")
+    private String keycloakBaseUrl;
 
     @Value("${keycloak.token-uri}")
     private String tokenUri;
@@ -40,31 +44,46 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public Mono<TokenResponseDto> login(LoginRequestDto login) {
-        Mono<TokenResponseDto> dtoMono = webClient.post()
-                .uri(tokenUri)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData("grant_type", "password")
-                        .with("client_id", clientId)
-                        .with("client_secret", clientSecret)
-                        .with("username", login.getEmail())
-                        .with("password", login.getPassword()))
-                .retrieve()
-                .onStatus(httpStatus -> httpStatus.value() == 401, response -> response.bodyToMono(String.class)
-                        .doOnNext(error -> log.error("Keycloak 401 error: {}", error))
-                        .flatMap(error -> Mono.error(new RuntimeException("Unauthorized: " + error))))
-                .bodyToMono(TokenResponseDto.class);
+    public TokenResponseDto login(LoginRequestDto login) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        AuditEventDto auditEvent = new AuditEventDto(
-                "auth-service",
-                "USER_REGISTERED",
-                "User login with username: " + login.getEmail(),
-                LocalDateTime.now()
-        );
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "password");
+        params.put("client_id", clientId);
+        params.put("client_secret", clientSecret);
+        params.put("username", login.getEmail());
+        params.put("password", login.getPassword());
 
-        auditClient.sendAuditEvent(auditEvent).subscribe();
+        StringBuilder body = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (body.length() > 0) body.append("&");
+            body.append(entry.getKey()).append("=").append(entry.getValue());
+        }
 
-        return dtoMono;
+        HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
+
+        try {
+            ResponseEntity<TokenResponseDto> response = restTemplate.postForEntity(
+                    keycloakBaseUrl + tokenUri,
+                    request,
+                    TokenResponseDto.class
+            );
+
+            AuditEventDto auditEvent = new AuditEventDto(
+                    "auth-service",
+                    "USER_ONELOGIN",
+                    "User login with username: " + login.getEmail(),
+                    LocalDateTime.now()
+            );
+            auditClient.sendAuditEvent(auditEvent);
+
+            return response.getBody();
+
+        } catch (HttpClientErrorException.Unauthorized ex) {
+            log.error("Unauthorized: {}", ex.getResponseBodyAsString());
+            throw new RuntimeException("Unauthorized: " + ex.getResponseBodyAsString());
+        }
     }
 
     @Override

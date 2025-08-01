@@ -70,8 +70,10 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
+      - JAVA_OPTS=-Dorg.keycloak=DEBUG -Dorg.keycloak.events=DEBUG
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - keycloak-data:/opt/keycloak/data
     networks:
       - my-network
 
@@ -132,6 +134,7 @@ services:
       - my-network
 
 volumes:
+  keycloak-data:
   postgres-data:
 
 networks:

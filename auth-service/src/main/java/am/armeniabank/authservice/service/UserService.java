@@ -1,15 +1,11 @@
 package am.armeniabank.authservice.service;
 
 import am.armeniabank.authservice.dto.UserDto;
-import am.armeniabank.authservice.dto.UserRegistrationRequest;
 import am.armeniabank.authservice.dto.UserUpdateRequest;
-import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
 public interface UserService {
-
-    Mono<UserDto> register(UserRegistrationRequest register);
 
     UserDto findByEmail(String email);
 

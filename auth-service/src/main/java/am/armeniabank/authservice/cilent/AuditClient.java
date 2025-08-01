@@ -3,38 +3,39 @@ package am.armeniabank.authservice.cilent;
 import am.armeniabank.authservice.dto.AuditEventDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import java.time.Duration;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 @Slf4j
 public class AuditClient {
 
-    private final WebClient webClient;
+    private final RestTemplate restTemplate;
+    private final String auditServiceUrl;
 
     public AuditClient(@Value("${audit-service.url}") String auditServiceUrl) {
-        this.webClient = WebClient.builder()
-                .baseUrl(auditServiceUrl)
-                .build();
+        this.restTemplate = new RestTemplate();
+        this.auditServiceUrl = auditServiceUrl;
     }
 
-    public Mono<Void> sendAuditEvent(AuditEventDto event) {
-        return webClient.post()
-                .uri("/api/audit")
-                .bodyValue(event)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
-                        .filter(throwable -> throwable instanceof WebClientRequestException)
-                        .doBeforeRetry(retrySignal -> log.warn("Повторная попытка отправки события аудита, попытка {}", retrySignal.totalRetries() + 1))
-                        .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) ->
-                                new RuntimeException("Не удалось отправить событие аудита после повторных попыток", retrySignal.failure())))
-                .doOnSuccess(v -> log.info("Событие аудита успешно отправлено"))
-                .doOnError(e -> log.error("Ошибка при отправке события аудита: {}", e.getMessage(), e));
+    public void sendAuditEvent(AuditEventDto event) {
+        String url = auditServiceUrl + "/api/audit";
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<AuditEventDto> request = new HttpEntity<>(event, headers);
+
+            ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Audit event sent successfully");
+            } else {
+                log.warn("Audit event sent but status received: {}", response.getStatusCode());
+            }
+
+        } catch (RestClientException e) {
+            log.error("Error sending audit event: {}", e.getMessage(), e);
+        }
     }
 }

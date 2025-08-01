@@ -30,14 +30,14 @@ spring:
             - StripPrefix=2
 
         - id: auth-service
-          uri: http://auth-service:8081
+          uri: http://auth-service:8085
           predicates:
             - Path=/api/auth/**
           filters:
             - StripPrefix=2
 
         - id: audit-service
-          uri: http://audit-service:8082
+          uri: http://audit-service:8083
           predicates:
             - Path=/api/users/**
           filters:
@@ -76,12 +76,6 @@ spring:
     resourceserver:
       jwt:
         issuer-uri: http://backend-keycloak-auth:8080/auth/realms/ArmeniaBank
-
-quarkus:
-  infinispan-client:
-    global-state-enabled: true
-  transaction-manager:
-    enable-recovery: true
 
 debug: true
 logging:
