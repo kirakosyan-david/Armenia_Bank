@@ -86,6 +86,4 @@ public interface UserMapper {
     @Mapping(source = "user.emailVerified", target = "emailVerified")
     @Mapping(source = "userVerification.passportNumber", target = "passportNumber")
     UpdateUserDto toUserUpdateDto(User user, UserVerification userVerification);
-
-    User toUserUpdateDto(UserUpdateRequest request);
 }
