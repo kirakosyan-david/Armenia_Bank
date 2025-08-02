@@ -13,7 +13,10 @@ import lombok.Setter;
 public class UpdateUserDto {
 
     private String email;
-    private String passportNumber;
-    private Boolean enabled;
+
     private UserRole role;
+
+    private Boolean emailVerified;
+
+    private String passportNumber;
 }

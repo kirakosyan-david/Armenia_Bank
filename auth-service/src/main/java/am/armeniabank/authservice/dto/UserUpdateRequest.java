@@ -1,9 +1,12 @@
 package am.armeniabank.authservice.dto;
 
+import am.armeniabank.authservice.entity.emuns.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -11,8 +14,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserUpdateRequest {
 
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
-    private String address;
+    private String email;
+
+    private String password;
+
+    private UserRole role;
+
+    private boolean emailVerified;
+
 }

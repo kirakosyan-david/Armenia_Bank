@@ -61,3 +61,8 @@ keycloak:
   realm: ArmeniaBank
   client-id: auth-service
   client-secret: auth-service
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG

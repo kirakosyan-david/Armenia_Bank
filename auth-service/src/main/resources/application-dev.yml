@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8081
 
 spring:
   application:
@@ -50,7 +50,7 @@ kafka:
     auth-events: auth-events
 
 audit-service:
-  url: http://audit-service:8083
+  url: http://audit-service:8082
 
 
 keycloak:
