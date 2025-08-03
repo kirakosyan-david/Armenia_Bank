@@ -27,6 +27,18 @@ spring:
     default-schema: auth_service
     clear-checksums: true
 
+  mail:
+    host: smtp.gmail.com
+    username: armeniabank25@gmail.com
+    password: xukgxkpjyeqpanry
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   kafka:
     bootstrap-servers: kafka:9092
     consumer:
@@ -63,6 +75,10 @@ keycloak:
   client-secret: auth-service
 
 logging:
+  config: classpath:/logback-spring.xml
   level:
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: DEBUG
+
+app:
+  verification-url: http://localhost:8081/api/verify/email

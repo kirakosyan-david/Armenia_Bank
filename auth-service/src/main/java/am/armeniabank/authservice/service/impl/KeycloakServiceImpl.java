@@ -63,7 +63,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         payload.put("firstName", register.getFirstName());
         payload.put("lastName", register.getLastName());
         payload.put("enabled", true);
-        payload.put("emailVerified", true);
+        payload.put("emailVerified", register.isEmailVerified());
         payload.put("credentials", List.of(Map.of(
                 "type", "password",
                 "value", register.getPassword(),
@@ -142,7 +142,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         payload.put("id", userId);
         payload.put("email", request.getEmail());
         payload.put("enabled", true);
-        payload.put("emailVerified", true);
+        payload.put("emailVerified", request.isEmailVerified());
 
         HttpEntity<Map<String, Object>> updateRequest = new HttpEntity<>(payload, headers);
         restTemplate.exchange(

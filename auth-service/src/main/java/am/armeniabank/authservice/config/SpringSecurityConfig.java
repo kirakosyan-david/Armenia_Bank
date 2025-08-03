@@ -27,7 +27,9 @@ public class SpringSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/users/register", "/api/users/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
+                                "/api/users/register", "/api/users/login",
+                                "/api/verify/email", "/api/verify/email/update").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/search", "/api/users/{id}").hasAnyAuthority("ADMIN", "USER")
                         .requestMatchers(HttpMethod.PUT, "/api/users/update/{id}").hasAnyAuthority("ADMIN", "USER")
                         .anyRequest().authenticated()

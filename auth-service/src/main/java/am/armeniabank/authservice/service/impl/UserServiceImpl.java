@@ -1,5 +1,7 @@
 package am.armeniabank.authservice.service.impl;
 
+import am.armeniabank.authservice.cilent.AuditClient;
+import am.armeniabank.authservice.dto.AuditEventDto;
 import am.armeniabank.authservice.dto.UpdateUserDto;
 import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.dto.UserResponseDto;
@@ -12,6 +14,7 @@ import am.armeniabank.authservice.mapper.UserMapper;
 import am.armeniabank.authservice.repository.UserRepository;
 import am.armeniabank.authservice.security.CurrentUser;
 import am.armeniabank.authservice.service.KeycloakService;
+import am.armeniabank.authservice.service.MailService;
 import am.armeniabank.authservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final KeycloakService keycloakService;
+    private final AuditClient auditClient;
+    private final MailService mailService;
 
     @Override
     public UserEmailSearchResponseDto searchByEmail(String email) {
@@ -72,19 +77,32 @@ public class UserServiceImpl implements UserService {
         userById.setEmail(request.getEmail());
         userById.setPassword(passwordEncoder.encode(request.getPassword()));
         userById.setRole(UserRole.valueOf(request.getRole().name().toUpperCase(Locale.ROOT)));
-        userById.setEmailVerified(true);
+        userById.setEmailVerified(false);
         userById.setUpdatedAt(LocalDateTime.now());
 
         User user = userRepository.save(userById);
 
+        mailService.sendVerificationUpdateEmail(user);
+
         keycloakService.updateUserInKeycloak(oldEmail, request, user.getRole());
+
+        AuditEventDto auditEvent = new AuditEventDto(
+                "auth-service",
+                "USER_UPDATED",
+                "User Update with username: " + request.getEmail(),
+                LocalDateTime.now()
+        );
+
+        auditClient.sendAuditEvent(auditEvent);
 
         return userMapper.toUserUpdateDto(user, user.getVerification());
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return false;
+        return userRepository.findByEmail(email)
+                .map(user -> true)
+                .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " not found"));
     }
 
     @Override

@@ -76,6 +76,11 @@ public class UserVerification {
     @Column(name = "additional_comments", length = 1000)
     private String additionalComments;
 
+    @Column(name = "verification_token", length = 64)
+    private String verificationToken;
+
+    private LocalDateTime verificationTokenExpiry;
+
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)

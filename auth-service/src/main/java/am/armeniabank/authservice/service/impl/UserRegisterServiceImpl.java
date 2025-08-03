@@ -6,17 +6,12 @@ import am.armeniabank.authservice.dto.UserDto;
 import am.armeniabank.authservice.dto.UserRegistrationRequest;
 import am.armeniabank.authservice.entity.User;
 import am.armeniabank.authservice.entity.UserProfile;
-import am.armeniabank.authservice.entity.UserVerification;
-import am.armeniabank.authservice.entity.emuns.DocumentType;
 import am.armeniabank.authservice.entity.emuns.Gender;
-import am.armeniabank.authservice.entity.emuns.RejectionReason;
 import am.armeniabank.authservice.entity.emuns.UserRole;
-import am.armeniabank.authservice.entity.emuns.VerificationMethod;
-import am.armeniabank.authservice.entity.emuns.VerificationStatus;
-import am.armeniabank.authservice.entity.emuns.VerifierType;
 import am.armeniabank.authservice.mapper.UserMapper;
 import am.armeniabank.authservice.repository.UserRepository;
 import am.armeniabank.authservice.service.KeycloakService;
+import am.armeniabank.authservice.service.MailService;
 import am.armeniabank.authservice.service.UserRegisterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +37,8 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 
     private final KeycloakService keycloakService;
 
+    private final MailService mailService;
+
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserDto register(UserRegistrationRequest register) {
@@ -59,7 +56,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
                 .email(register.getEmail())
                 .password(passwordEncoder.encode(register.getPassword()))
                 .role(UserRole.USER)
-                .emailVerified(true)
+                .emailVerified(false)
                 .build();
 
         UserProfile profile = UserProfile.builder()
@@ -70,19 +67,11 @@ public class UserRegisterServiceImpl implements UserRegisterService {
                 .user(user)
                 .build();
 
-        UserVerification verification = UserVerification.builder()
-                .status(VerificationStatus.PENDING)
-                .passportNumber(register.getPassportNumber())
-                .documentType(DocumentType.PASSPORT)
-                .rejectionReason(RejectionReason.REJECTED)
-                .verificationMethod(VerificationMethod.MAIL)
-                .verifiedByType(VerifierType.HUMAN)
-                .user(user)
-                .build();
-
         user.setProfile(profile);
-        user.setVerification(verification);
+
         userRepository.save(user);
+
+        mailService.sendVerificationEmail(user, register.getPassportNumber());
 
         keycloakService.createUserInKeycloak(register, user.getRole());
 
@@ -95,7 +84,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 
         auditClient.sendAuditEvent(auditEvent);
 
-        return userMapper.toDto(user, profile, verification);
+        return userMapper.toDto(user, profile, user.getVerification());
     }
 
 }
