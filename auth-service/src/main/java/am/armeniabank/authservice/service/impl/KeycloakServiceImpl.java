@@ -192,6 +192,57 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
 
+    @Override
+    public boolean deleteUserFromKeycloak(String email) {
+        String userId = getUserIdByEmail(email); // теперь правильно
+        if (userId == null) {
+            log.error("Пользователь с email {} не найден в Keycloak", email);
+            return false;
+        }
+        try {
+            String accessToken = getAdminAccessToken();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            restTemplate.exchange(
+                    keycloakBaseUrl + "/admin/realms/" + realm + "/users/" + userId,
+                    HttpMethod.DELETE,
+                    entity,
+                    Void.class
+            );
+
+            log.info("User with ID {} has been successfully removed from Keycloak", userId);
+            return true;
+        } catch (Exception e) {
+            log.error("Error deleting user from Keycloak: {}", e.getMessage());
+            return false;
+        }
+    }
+
+
+    private String getUserIdByEmail(String email) {
+        String accessToken = getAdminAccessToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        ResponseEntity<List> response = restTemplate.exchange(
+                keycloakBaseUrl + "/admin/realms/" + realm + "/users?email=" + email,
+                HttpMethod.GET,
+                entity,
+                List.class
+        );
+
+        List<?> users = response.getBody();
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+
+        Map<String, Object> user = (Map<String, Object>) users.get(0);
+        return (String) user.get("id");
+    }
+
     private String getAdminAccessToken() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

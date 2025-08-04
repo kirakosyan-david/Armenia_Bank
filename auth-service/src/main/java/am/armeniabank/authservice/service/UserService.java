@@ -1,7 +1,6 @@
 package am.armeniabank.authservice.service;
 
 import am.armeniabank.authservice.dto.UpdateUserDto;
-import am.armeniabank.authservice.dto.UserDto;
 import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.dto.UserResponseDto;
 import am.armeniabank.authservice.dto.UserUpdateRequest;
@@ -15,15 +14,7 @@ public interface UserService {
 
     UserResponseDto findById(UUID id, CurrentUser currentUser);
 
-    UpdateUserDto update(UUID id, UserUpdateRequest request);
-
-    boolean existsByEmail(String email);
-
-    void enableUser(UUID userId);
-
-    void lockUser(UUID userId, String reason);
-
-    void resetPassword(UUID userId, String newPassword);
+    UpdateUserDto updateUser(UUID id, UserUpdateRequest request);
 
     void updateLastLogin(UUID userId);
 

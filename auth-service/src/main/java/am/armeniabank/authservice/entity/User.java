@@ -48,8 +48,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    private boolean enabled;
-
     private boolean emailVerified;
 
     private LocalDateTime lastLoginAt;
@@ -58,13 +56,7 @@ public class User {
 
     private LocalDateTime updatedAt;
 
-    private String passwordResetToken;
-
-    private LocalDateTime passwordResetTokenExpiry;
-
     private LocalDateTime accountLockedUntil;
-
-    private String lockReason;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserProfile profile;

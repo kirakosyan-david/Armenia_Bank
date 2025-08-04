@@ -3,8 +3,11 @@ package am.armeniabank.authservice.service.impl;
 import am.armeniabank.authservice.cilent.AuditClient;
 import am.armeniabank.authservice.dto.AuditEventDto;
 import am.armeniabank.authservice.dto.LoginRequestDto;
+import am.armeniabank.authservice.dto.RefreshTokenRequestDto;
 import am.armeniabank.authservice.dto.TokenResponseDto;
+import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.service.AuthService;
+import am.armeniabank.authservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,6 +33,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final RestTemplate restTemplate;
 
+    private final UserService userService;
+
     @Value("${keycloak.base-url}")
     private String keycloakBaseUrl;
 
@@ -43,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
+    @Transactional
     public TokenResponseDto login(LoginRequestDto login) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -69,6 +76,10 @@ public class AuthServiceImpl implements AuthService {
                     TokenResponseDto.class
             );
 
+            UserEmailSearchResponseDto userDto = userService.searchByEmail(login.getEmail());
+
+            userService.updateLastLogin(userDto.getId());
+
             AuditEventDto auditEvent = new AuditEventDto(
                     "auth-service",
                     "USER_ONELOGIN",
@@ -86,12 +97,66 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String token) {
+    public void logout(RefreshTokenRequestDto refreshToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("client_id", clientId);
+        params.put("client_secret", clientSecret);
+        params.put("refresh_token", refreshToken.getRefreshToken());
+
+        StringBuilder body = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (body.length() > 0) body.append("&");
+            body.append(entry.getKey()).append("=").append(entry.getValue());
+        }
+
+        HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
+
+        try {
+            restTemplate.postForEntity(
+                    keycloakBaseUrl + "/realms/ArmeniaBank/protocol/openid-connect/logout",
+                    request,
+                    String.class
+            );
+            log.info("User successfully logged out");
+        } catch (HttpClientErrorException ex) {
+            log.error("Logout failed: {}", ex.getResponseBodyAsString());
+            throw new RuntimeException("Logout failed: " + ex.getResponseBodyAsString());
+        }
     }
 
     @Override
-    public String refreshAccessToken(String refreshToken) {
-        return "";
+    public String refreshAccessToken(RefreshTokenRequestDto refreshToken) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "refresh_token");
+        params.put("client_id", clientId);
+        params.put("client_secret", clientSecret);
+        params.put("refresh_token", refreshToken.getRefreshToken());
+
+        StringBuilder body = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (body.length() > 0) body.append("&");
+            body.append(entry.getKey()).append("=").append(entry.getValue());
+        }
+
+        HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
+
+        try {
+            ResponseEntity<TokenResponseDto> response = restTemplate.postForEntity(
+                    keycloakBaseUrl + tokenUri,
+                    request,
+                    TokenResponseDto.class
+            );
+            return response.getBody().getAccessToken();
+        } catch (HttpClientErrorException ex) {
+            log.error("Token refresh failed: {}", ex.getResponseBodyAsString());
+            throw new RuntimeException("Token refresh failed: " + ex.getResponseBodyAsString());
+        }
     }
 }

@@ -1,6 +1,7 @@
 package am.armeniabank.authservice.controller;
 
 import am.armeniabank.authservice.dto.LoginRequestDto;
+import am.armeniabank.authservice.dto.RefreshTokenRequestDto;
 import am.armeniabank.authservice.dto.TokenResponseDto;
 import am.armeniabank.authservice.dto.UpdateUserDto;
 import am.armeniabank.authservice.dto.UserDto;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -89,11 +91,35 @@ public class AuthController {
     @PutMapping("/update/{id}")
     public ResponseEntity<UpdateUserDto> updateUser(@PathVariable UUID id, @RequestBody UserUpdateRequest request) {
         try {
-            UpdateUserDto user = userService.update(id, request);
+            UpdateUserDto user = userService.updateUser(id, request);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            log.error("Id failed for user {}: {}", id, e.getMessage());
+            log.error("Id failed for user update {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+        try {
+            userService.deleteUser(userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Failed to delete user with ID {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestParam RefreshTokenRequestDto refreshToken) {
+        authService.logout(refreshToken);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refreshToken(@Valid @RequestParam RefreshTokenRequestDto refreshToken) {
+        String newAccessToken = authService.refreshAccessToken(refreshToken);
+        return ResponseEntity.ok(newAccessToken);
+    }
+
 }

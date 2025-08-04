@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRegisterService {
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+
     UserDto register(UserRegistrationRequest register);
+
 }

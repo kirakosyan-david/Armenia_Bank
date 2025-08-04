@@ -4,7 +4,6 @@ import am.armeniabank.authservice.dto.UpdateUserDto;
 import am.armeniabank.authservice.dto.UserDto;
 import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.dto.UserResponseDto;
-import am.armeniabank.authservice.dto.UserUpdateRequest;
 import am.armeniabank.authservice.entity.User;
 import am.armeniabank.authservice.entity.UserProfile;
 import am.armeniabank.authservice.entity.UserVerification;
@@ -25,17 +24,14 @@ public interface UserMapper {
     @Mapping(source = "userProfile.patronymic", target = "patronymic")
     UserDto toDto(User user, UserProfile userProfile, UserVerification userVerification);
 
+    @Mapping(source = "user.id", target = "id")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.role", target = "role")
-    @Mapping(source = "user.enabled", target = "enabled")
     @Mapping(source = "user.emailVerified", target = "emailVerified")
     @Mapping(source = "user.lastLoginAt", target = "lastLoginAt")
     @Mapping(source = "user.createdAt", target = "createdAt")
     @Mapping(source = "user.updatedAt", target = "updatedAt")
-    @Mapping(source = "user.passwordResetToken", target = "passwordResetToken")
-    @Mapping(source = "user.passwordResetTokenExpiry", target = "passwordResetTokenExpiry")
     @Mapping(source = "user.accountLockedUntil", target = "accountLockedUntil")
-    @Mapping(source = "user.lockReason", target = "lockReason")
     @Mapping(source = "userProfile.firstName", target = "firstName")
     @Mapping(source = "userProfile.lastName", target = "lastName")
     @Mapping(source = "userProfile.patronymic", target = "patronymic")

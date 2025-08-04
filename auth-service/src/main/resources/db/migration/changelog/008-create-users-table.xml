@@ -8,20 +8,17 @@
 
             <sql>
 
-                CREATE TABLE users (
-                                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                                       email VARCHAR(255) NOT NULL UNIQUE,
-                                       password VARCHAR(255) NOT NULL,
-                                       role user_role NOT NULL,
-                                       enabled BOOLEAN,
-                                       email_verified BOOLEAN,
-                                       last_login_at TIMESTAMP,
-                                       created_at TIMESTAMP,
-                                       updated_at TIMESTAMP,
-                                       password_reset_token VARCHAR(255),
-                                       password_reset_token_expiry TIMESTAMP,
-                                       account_locked_until TIMESTAMP,
-                                       lock_reason VARCHAR(255)
+                CREATE TABLE users
+                (
+                    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    email                VARCHAR(255) NOT NULL UNIQUE,
+                    password             VARCHAR(255) NOT NULL,
+                    role                 user_role    NOT NULL,
+                    email_verified       BOOLEAN,
+                    last_login_at        TIMESTAMP,
+                    created_at           TIMESTAMP,
+                    updated_at           TIMESTAMP,
+                    account_locked_until TIMESTAMP
                 );
             </sql>
 

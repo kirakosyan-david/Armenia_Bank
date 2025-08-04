@@ -5,9 +5,12 @@ import am.armeniabank.authservice.dto.UserUpdateRequest;
 import am.armeniabank.authservice.entity.emuns.UserRole;
 
 public interface KeycloakService {
+
     boolean emailExistsInKeycloak(String email);
 
     void createUserInKeycloak(UserRegistrationRequest register, UserRole role);
 
     void updateUserInKeycloak(String currentEmail, UserUpdateRequest request, UserRole role);
+
+    boolean deleteUserFromKeycloak(String email);
 }

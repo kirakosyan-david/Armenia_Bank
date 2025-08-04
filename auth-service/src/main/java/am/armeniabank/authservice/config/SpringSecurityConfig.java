@@ -32,6 +32,8 @@ public class SpringSecurityConfig {
                                 "/api/verify/email", "/api/verify/email/update").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/search", "/api/users/{id}").hasAnyAuthority("ADMIN", "USER")
                         .requestMatchers(HttpMethod.PUT, "/api/users/update/{id}").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/delete/{userId}").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, "/api/users/logout", "/api/users/refresh").hasAnyAuthority("ADMIN", "USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,6 +21,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class UserEmailSearchResponseDto {
+
+    private UUID id;
 
     private String email;
 
@@ -35,13 +38,7 @@ public class UserEmailSearchResponseDto {
 
     private LocalDateTime updatedAt;
 
-    private String passwordResetToken;
-
-    private LocalDateTime passwordResetTokenExpiry;
-
     private LocalDateTime accountLockedUntil;
-
-    private String lockReason;
 
     private String firstName;
 

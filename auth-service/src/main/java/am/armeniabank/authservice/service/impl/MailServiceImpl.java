@@ -31,16 +31,6 @@ public class MailServiceImpl implements MailService {
     @Value("${app.verification-url}")
     private String verificationUrl;
 
-    @Async
-    @Override
-    public void sendMail(String to, String subject, String text) {
-        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setTo(to);
-        simpleMailMessage.setSubject(subject);
-        simpleMailMessage.setText(text);
-        mailSender.send(simpleMailMessage);
-    }
-
     @Override
     public void sendVerificationEmail(User user, String passportNumber) {
         String token = UUID.randomUUID().toString();
@@ -124,17 +114,4 @@ public class MailServiceImpl implements MailService {
         return "Email verification successful";
     }
 
-    @Async
-    @Override
-    public void sendFromMail(String fromEmail, String subject, String name, String text) {
-        String toEmail = "armeniabank25@gmail.com";
-        SimpleMailMessage message = new SimpleMailMessage();
-
-        message.setTo(toEmail);
-        message.setSubject(subject);
-        message.setText("Sender: " + name + ", " + fromEmail
-                + "\nmessage: " + text);
-
-        mailSender.send(message);
-    }
 }

@@ -22,6 +22,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -63,7 +65,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UpdateUserDto update(UUID id, UserUpdateRequest request) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public UpdateUserDto updateUser(UUID id, UserUpdateRequest request) {
 
         User userById = findUserById(id);
 
@@ -99,35 +102,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean existsByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(user -> true)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " not found"));
-    }
-
-    @Override
-    public void enableUser(UUID userId) {
-
-    }
-
-    @Override
-    public void lockUser(UUID userId, String reason) {
-
-    }
-
-    @Override
-    public void resetPassword(UUID userId, String newPassword) {
-
-    }
-
-    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateLastLogin(UUID userId) {
-
+        User user = findUserById(userId);
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteUser(UUID userId) {
+        User user = findUserById(userId);
 
+        boolean keycloakDeleted = keycloakService.deleteUserFromKeycloak(user.getEmail());
+        if (!keycloakDeleted) {
+            log.warn("User not removed from Keycloak: {}", user.getEmail());
+        }
+        userRepository.deleteById(user.getId());
+        log.info("The user with email address {} has been removed from the database.", user.getEmail());
     }
 
     private User findUserById(UUID id) {
