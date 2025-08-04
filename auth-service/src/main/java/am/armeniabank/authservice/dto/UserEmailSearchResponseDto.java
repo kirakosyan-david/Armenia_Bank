@@ -6,6 +6,7 @@ import am.armeniabank.authservice.entity.emuns.UserRole;
 import am.armeniabank.authservice.entity.emuns.VerificationMethod;
 import am.armeniabank.authservice.entity.emuns.VerificationStatus;
 import am.armeniabank.authservice.entity.emuns.VerifierType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,12 +33,16 @@ public class UserEmailSearchResponseDto {
 
     private boolean emailVerified;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime lastLoginAt;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime createdAt;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime updatedAt;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime accountLockedUntil;
 
     private String firstName;
@@ -50,10 +55,13 @@ public class UserEmailSearchResponseDto {
 
     private String passportNumber;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime requestedAt;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime verifiedAt;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime expiredAt;
 
     private String bankAccountNumber;
@@ -66,6 +74,7 @@ public class UserEmailSearchResponseDto {
 
     private VerificationMethod verificationMethod;
 
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "UTC")
     private LocalDateTime documentsUploadedAt;
 
     private String verifiedBy;

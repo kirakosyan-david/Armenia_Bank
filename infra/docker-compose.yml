@@ -15,6 +15,18 @@ services:
     networks:
       - my-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+    environment:
+      REDIS_PASSWORD: auth_service
+    command: [ "redis-server", "--requirepass", "auth_service" ]
+    networks:
+      - my-network
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
     container_name: zookeeper
@@ -118,6 +130,7 @@ services:
       context: ../auth-service
     container_name: auth-service
     depends_on:
+      - redis
       - backend-keycloak-auth
       - postgres
       - kafka

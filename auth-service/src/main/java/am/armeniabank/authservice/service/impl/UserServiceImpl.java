@@ -18,6 +18,10 @@ import am.armeniabank.authservice.service.MailService;
 import am.armeniabank.authservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,8 +44,10 @@ public class UserServiceImpl implements UserService {
     private final KeycloakService keycloakService;
     private final AuditClient auditClient;
     private final MailService mailService;
+    private final CacheManager cacheManager;
 
     @Override
+    @Cacheable(value = "userByEmail", key = "#email")
     public UserEmailSearchResponseDto searchByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new UsernameNotFoundException("User with email " + email + " not found")
@@ -52,6 +58,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userById", key = "#id")
     public UserResponseDto findById(UUID id, CurrentUser currentUser) {
         User user = findUserById(id);
 
@@ -66,6 +73,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Caching(evict = {
+            @CacheEvict(value = "userByEmail", key = "#request.email"),
+            @CacheEvict(value = "userById", key = "#id")
+    })
     public UpdateUserDto updateUser(UUID id, UserUpdateRequest request) {
 
         User userById = findUserById(id);
@@ -120,6 +131,25 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(user.getId());
         log.info("The user with email address {} has been removed from the database.", user.getEmail());
+
+        evictCacheManual(user.getEmail(), user.getId());
+    }
+
+    protected void evictCacheManual(String email, UUID id) {
+        if (email != null) {
+            var cache = cacheManager.getCache("userByEmail");
+            if (cache != null) {
+                cache.evict(email);
+                log.info("Evicted userByEmail cache for {}", email);
+            }
+        }
+        if (id != null) {
+            var cache = cacheManager.getCache("userById");
+            if (cache != null) {
+                cache.evict(id);
+                log.info("Evicted userById cache for {}", id);
+            }
+        }
     }
 
     private User findUserById(UUID id) {

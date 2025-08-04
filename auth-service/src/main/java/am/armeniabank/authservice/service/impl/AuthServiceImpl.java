@@ -8,6 +8,8 @@ import am.armeniabank.authservice.dto.TokenResponseDto;
 import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.service.AuthService;
 import am.armeniabank.authservice.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
     private final RestTemplate restTemplate;
 
     private final UserService userService;
+
+    private final ObjectMapper objectMapper;
 
     @Value("${keycloak.base-url}")
     private String keycloakBaseUrl;
@@ -54,30 +60,28 @@ public class AuthServiceImpl implements AuthService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Map<String, String> params = new LinkedHashMap<>();
-        params.put("grant_type", "password");
-        params.put("client_id", clientId);
-        params.put("client_secret", clientSecret);
-        params.put("username", login.getEmail());
-        params.put("password", login.getPassword());
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "password");
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("username", login.getEmail());
+        params.add("password", login.getPassword());
 
-        StringBuilder body = new StringBuilder();
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (body.length() > 0) body.append("&");
-            body.append(entry.getKey()).append("=").append(entry.getValue());
-        }
-
-        HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
         try {
-            ResponseEntity<TokenResponseDto> response = restTemplate.postForEntity(
+            ResponseEntity<String> response = restTemplate.postForEntity(
                     keycloakBaseUrl + tokenUri,
                     request,
-                    TokenResponseDto.class
+                    String.class
             );
 
-            UserEmailSearchResponseDto userDto = userService.searchByEmail(login.getEmail());
+            String responseBody = response.getBody();
+            log.info("Token response JSON: {}", responseBody);
 
+            TokenResponseDto tokenResponse = objectMapper.readValue(responseBody, TokenResponseDto.class);
+
+            UserEmailSearchResponseDto userDto = userService.searchByEmail(login.getEmail());
             userService.updateLastLogin(userDto.getId());
 
             AuditEventDto auditEvent = new AuditEventDto(
@@ -88,11 +92,14 @@ public class AuthServiceImpl implements AuthService {
             );
             auditClient.sendAuditEvent(auditEvent);
 
-            return response.getBody();
+            return tokenResponse;
 
         } catch (HttpClientErrorException.Unauthorized ex) {
             log.error("Unauthorized: {}", ex.getResponseBodyAsString());
             throw new RuntimeException("Unauthorized: " + ex.getResponseBodyAsString());
+        } catch (Exception ex) {
+            log.error("Login error: {}", ex.getMessage());
+            throw new RuntimeException("Login error: " + ex.getMessage(), ex);
         }
     }
 

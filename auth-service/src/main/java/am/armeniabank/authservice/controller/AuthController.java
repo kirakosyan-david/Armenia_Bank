@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,10 +70,12 @@ public class AuthController {
     @GetMapping("/search")
     public ResponseEntity<UserEmailSearchResponseDto> searchEmail(@RequestParam String email) {
         try {
-            UserEmailSearchResponseDto searchByEmail = userService.searchByEmail(email);
-            return ResponseEntity.ok(searchByEmail);
+            UserEmailSearchResponseDto dto = userService.searchByEmail(email);
+            return ResponseEntity.ok(dto);
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
-            log.error("Email failed for user {}: {}", email, e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
