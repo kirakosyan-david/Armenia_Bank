@@ -9,6 +9,10 @@ import am.armeniabank.authservice.dto.UserEmailSearchResponseDto;
 import am.armeniabank.authservice.dto.UserRegistrationRequest;
 import am.armeniabank.authservice.dto.UserResponseDto;
 import am.armeniabank.authservice.dto.UserUpdateRequest;
+import am.armeniabank.authservice.exception.custom.SearchEmailException;
+import am.armeniabank.authservice.exception.custom.UserLoginException;
+import am.armeniabank.authservice.exception.custom.UserServerError;
+import am.armeniabank.authservice.exception.custom.WrongUserIdException;
 import am.armeniabank.authservice.security.CurrentUser;
 import am.armeniabank.authservice.service.AuthService;
 import am.armeniabank.authservice.service.UserRegisterService;
@@ -19,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +52,7 @@ public class AuthController {
         try {
             UserDto result = userRegisterService.register(register);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
+        } catch (UserServerError e) {
             log.error("Registration failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -61,7 +64,7 @@ public class AuthController {
         try {
             TokenResponseDto token = authService.login(login);
             return ResponseEntity.ok(token);
-        } catch (Exception e) {
+        } catch (UserLoginException e) {
             log.error("Login failed for user {}: {}", login.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -72,9 +75,9 @@ public class AuthController {
         try {
             UserEmailSearchResponseDto dto = userService.searchByEmail(email);
             return ResponseEntity.ok(dto);
-        } catch (UsernameNotFoundException e) {
+        } catch (SearchEmailException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
+        } catch (UserServerError e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -85,7 +88,7 @@ public class AuthController {
         try {
             UserResponseDto user = userService.findById(id, currentUser);
             return ResponseEntity.ok(user);
-        } catch (Exception e) {
+        } catch (WrongUserIdException e) {
             log.error("Id failed for user {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -96,7 +99,7 @@ public class AuthController {
         try {
             UpdateUserDto user = userService.updateUser(id, request);
             return ResponseEntity.ok(user);
-        } catch (Exception e) {
+        } catch (UserServerError e) {
             log.error("Id failed for user update {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -107,7 +110,7 @@ public class AuthController {
         try {
             userService.deleteUser(userId);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
+        } catch (UserServerError e) {
             log.error("Failed to delete user with ID {}: {}", userId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
