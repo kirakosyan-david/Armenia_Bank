@@ -27,15 +27,36 @@ public class SpringSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
-                                "/api/users/register", "/api/users/login",
-                                "/api/verify/email", "/api/verify/email/update").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/search", "/api/users/{id}").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/update/{id}").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/delete/{userId}").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/api/users/logout", "/api/users/refresh").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/profile/{userId}","/api/users/profile/update/{userId}").hasAnyAuthority("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/users/profile/{userId}").hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers("/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/users/register",
+                                "/api/users/login",
+                                "/api/verify/email",
+                                "/api/verify/email/update")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/users/search",
+                                "/api/users/{id}",
+                                "/api/users/profile/{userId}",
+                                "/api/users/verification/{userId}")
+                        .hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/users/update/{id}",
+                                "/api/users/profile/{userId}",
+                                "/api/users/profile/update/{userId}",
+                                "/api/users/verification/start/{userId}",
+                                "/api/users/verification/update/document/{userId}",
+                                "/api/users/verification/approve/{userId}",
+                                "/api/users/verification/reject/{userId}",
+                                "/api/users/verification/expire/{userId}")
+                        .hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/users/delete/{userId}")
+                        .hasAnyAuthority("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/users/logout",
+                                "/api/users/refresh")
+                        .hasAnyAuthority("ADMIN", "USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

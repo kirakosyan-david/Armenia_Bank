@@ -60,9 +60,8 @@ spring:
 
   servlet:
     multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 50MB
+      max-request-size: 200MB
 
 springdoc:
   api-docs:
@@ -98,6 +97,6 @@ app:
   verification-url: http://localhost:8081/api/verify/email
 
 user:
-  profile:
+  verification:
     picture:
-      path: D:\Test_Task\Armenia_Bank\images
+      path: D:\Test_Task\Armenia_Bank\document

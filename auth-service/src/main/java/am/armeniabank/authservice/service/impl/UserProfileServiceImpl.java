@@ -13,6 +13,7 @@ import am.armeniabank.authservice.service.KeycloakService;
 import am.armeniabank.authservice.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    @Cacheable(value = "userById", key = "#userId")
+    @CacheEvict(value = "userById", key = "#userId")
     public UserProfileDto updateProfile(UUID userId, UserProfileUpdateRequestDto profile) {
         UserProfile userProfile = findByUserProfileId(userId);
 
@@ -107,7 +108,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
 
     @Override
-    @Cacheable(value = "userById", key = "#userId")
+    @CacheEvict(value = "userById", key = "#userId")
     public UserProfileDto getProfileByUserId(UUID userId) {
         UserProfile userProfile = findByUserProfileId(userId);
         return userProfileMapper.toUserProfileDto(userProfile);

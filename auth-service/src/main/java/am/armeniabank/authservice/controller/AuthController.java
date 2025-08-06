@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -106,13 +107,14 @@ public class AuthController {
     }
 
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable UUID userId) {
         try {
             userService.deleteUser(userId);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(Map.of("status", "success", "message", "User deleted successfully"));
         } catch (UserServerError e) {
             log.error("Failed to delete user with ID {}: {}", userId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", "error", "message", "Failed to delete user"));
         }
     }
 
