@@ -18,7 +18,6 @@
                 gender             user_profile_gender DEFAULT 'OTHER' NOT NULL,
                 phone_number       VARCHAR(50),
                 address            VARCHAR(500),
-                photo_url          VARCHAR(500),
                 nationality        VARCHAR(100),
                 citizenship        VARCHAR(100),
                 timezone           VARCHAR(100),

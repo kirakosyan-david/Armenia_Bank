@@ -50,8 +50,6 @@ public class UserProfile {
 
     private String address;
 
-    private String photoUrl;
-
     private String nationality;
 
     private String citizenship;

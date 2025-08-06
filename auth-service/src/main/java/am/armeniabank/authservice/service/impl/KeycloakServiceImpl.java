@@ -219,6 +219,48 @@ public class KeycloakServiceImpl implements KeycloakService {
         }
     }
 
+    public void updateKeycloakUserProfile(UUID keycloakUserId, String newFirstName, String newLastName) {
+        String adminToken = getAdminAccessToken();
+
+        String url = keycloakBaseUrl + "/admin/realms/" + realm + "/users/" + keycloakUserId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("firstName", newFirstName);
+        body.put("lastName", newLastName);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        restTemplate.put(url, request);
+    }
+
+
+    public String getKeycloakUserIdByEmail(String email) {
+        String adminToken = getAdminAccessToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                keycloakBaseUrl + "/admin/realms/" + realm + "/users?email=" + email,
+                HttpMethod.GET,
+                entity,
+                (Class<List<Map<String, Object>>>) (Class<?>) List.class
+        );
+
+        List<Map<String, Object>> users = response.getBody();
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+
+        return (String) users.get(0).get("id");
+    }
+
 
     private String getUserIdByEmail(String email) {
         String accessToken = getAdminAccessToken();

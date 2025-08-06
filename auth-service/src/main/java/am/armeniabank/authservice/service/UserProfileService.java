@@ -1,17 +1,18 @@
 package am.armeniabank.authservice.service;
 
+import am.armeniabank.authservice.dto.UserProfileDto;
+import am.armeniabank.authservice.dto.UserProfileRequestDto;
+import am.armeniabank.authservice.dto.UserProfileUpdateRequestDto;
 import am.armeniabank.authservice.entity.UserProfile;
 
 import java.util.UUID;
 
 public interface UserProfileService {
 
-    UserProfile createProfile(UUID userId, UserProfile profile);
+    UserProfileDto createProfile(UUID userId, UserProfileRequestDto profile);
 
-    UserProfile updateProfile(UUID userId, UserProfile profile);
+    UserProfileDto updateProfile(UUID userId, UserProfileUpdateRequestDto profile);
 
-    UserProfile getProfileByUserId(UUID userId);
-
-    void deleteProfile(UUID userId);
+    UserProfileDto getProfileByUserId(UUID userId);
 
 }
