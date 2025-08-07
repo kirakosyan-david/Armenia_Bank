@@ -5,6 +5,7 @@ import am.armeniabank.authservice.dto.UserProfileRequestDto;
 import am.armeniabank.authservice.dto.UserProfileUpdateRequestDto;
 import am.armeniabank.authservice.exception.custom.UserServerError;
 import am.armeniabank.authservice.service.UserProfileService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/api/users/profile")
 @Validated
+@SecurityRequirement(name = "keycloak")
 public class UserProfileController {
 
     private final UserProfileService userProfileService;

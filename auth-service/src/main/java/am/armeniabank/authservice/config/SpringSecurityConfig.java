@@ -27,8 +27,11 @@ public class SpringSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**",
+                        .requestMatchers(
+                                "/swagger-ui/**",
                                 "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/oauth2-redirect.html",
                                 "/api/users/register",
                                 "/api/users/login",
                                 "/api/verify/email",

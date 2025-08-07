@@ -17,6 +17,7 @@ import am.armeniabank.authservice.security.CurrentUser;
 import am.armeniabank.authservice.service.AuthService;
 import am.armeniabank.authservice.service.UserRegisterService;
 import am.armeniabank.authservice.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ import java.util.UUID;
 @RequestMapping("/api/users")
 @Validated
 @Slf4j
+@SecurityRequirement(name = "keycloak")
 public class AuthController {
 
     private final UserRegisterService userRegisterService;

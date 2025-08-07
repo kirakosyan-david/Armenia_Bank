@@ -1,6 +1,7 @@
 package am.armeniabank.authservice.controller;
 
 import am.armeniabank.authservice.service.MailService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/verify/email")
+@SecurityRequirement(name = "keycloak")
 public class EmailVerificationController {
 
     private final MailService mailService;

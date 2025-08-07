@@ -8,7 +8,20 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://backend-keycloak-auth:8080/realms/ArmeniaBank
+          issuer-uri: http://localhost:8080/realms/ArmeniaBank
+      client:
+        registration:
+          auth-service:
+            provider: keycloak
+            client-id: auth-service
+            client-secret: auth-service
+            scope: openid, profile, email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/swagger-ui/oauth2-redirect.html"
+            client-name: Swagger UI
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/ArmeniaBank
 
   datasource:
     url: jdbc:postgresql://postgres:5432/auth_service
@@ -64,13 +77,19 @@ spring:
       max-request-size: 200MB
 
 springdoc:
+  swagger-ui:
+    oauth2-redirect-url: http://localhost:8081/swagger-ui/oauth2-redirect.html
+    use-root-path: true
+    oauth:
+      client-id: auth-service
+      client-secret: auth-service
+      use-pkce-with-authorization-code-grant: true
+
   api-docs:
     path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-  swagger-ui.operations-sorter: alpha
-  swagger-configurations:
-    - classpath:/openapi.yaml
+
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 kafka:
   topic:
