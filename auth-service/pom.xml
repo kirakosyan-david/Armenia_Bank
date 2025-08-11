@@ -2,6 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
+	<modules>
+		<module>auth-service-api</module>
+		<module>auth-service-src</module>
+	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -21,6 +26,9 @@
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<springdoc-openapi.version>2.8.4</springdoc-openapi.version>
+		<keyclock.version>21.1.1</keyclock.version>
+		<maven.compaler.plugin.version>3.13.0</maven.compaler.plugin.version>
 	</properties>
 
 	<dependencies>
@@ -60,7 +68,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>21.1.1</version>
+			<version>${keyclock.version}</version>
 		</dependency>
 
 		<dependency>
@@ -87,13 +95,13 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.8.4</version>
+			<version>${springdoc-openapi.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-common</artifactId>
-			<version>2.8.4</version>
+			<version>${springdoc-openapi.version}</version>
 		</dependency>
 
 		<dependency>
@@ -154,7 +162,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>${maven.compaler.plugin.version}</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
@@ -175,7 +183,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${project.parent.version}</version>
 				<executions>
 					<execution>
 						<goals>
