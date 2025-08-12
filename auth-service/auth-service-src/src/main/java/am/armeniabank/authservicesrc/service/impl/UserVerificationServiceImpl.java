@@ -9,7 +9,7 @@ import am.armeniabank.authserviceapi.request.ApproveVerificationRequest;
 import am.armeniabank.authserviceapi.request.RejectVerificationRequest;
 import am.armeniabank.authserviceapi.request.StartVerificationRequest;
 import am.armeniabank.authserviceapi.request.UploadDocumentRequest;
-import am.armeniabank.authserviceapi.response.AuditEventResponse;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UserVerificationResponse;
 import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.entity.UserVerification;
@@ -57,7 +57,7 @@ public class UserVerificationServiceImpl implements UserVerificationService {
 
         UserVerification savedVerification = userVerificationRepository.save(userVerification);
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "START_VERIFICATION",
                 "User start Verification with username: " + userVerification.getUser().getEmail(),
@@ -81,7 +81,7 @@ public class UserVerificationServiceImpl implements UserVerificationService {
 
         userVerificationRepository.save(userVerification);
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "DOCUMENT_VERIFICATION",
                 "User Document Verification with username: " + userVerification.getUser().getEmail(),
@@ -105,7 +105,7 @@ public class UserVerificationServiceImpl implements UserVerificationService {
 
         userVerificationRepository.save(userVerification);
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "VERIFIER_TYPE",
                 "User Verifier Type Verification with username: " + userVerification.getUser().getEmail(),
@@ -129,7 +129,7 @@ public class UserVerificationServiceImpl implements UserVerificationService {
 
         userVerificationRepository.save(userVerification);
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "REJECTION_REASON",
                 "User Rejection Reason Verification with username: " + userVerification.getUser().getEmail(),
@@ -156,7 +156,7 @@ public class UserVerificationServiceImpl implements UserVerificationService {
 
         userVerificationRepository.save(userVerification);
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "VERIFICATION_EXPIRED",
                 "User Verification expire with username: " + userVerification.getUser().getEmail(),

@@ -1,6 +1,6 @@
 package am.armeniabank.authservicesrc.cilent;
 
-import am.armeniabank.authserviceapi.response.AuditEventResponse;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -23,12 +23,12 @@ public class AuditClient {
         this.auditServiceUrl = auditServiceUrl;
     }
 
-    public void sendAuditEvent(AuditEventResponse event) {
+    public void sendAuditEvent(AuditEvent event) {
         String url = auditServiceUrl + "/api/audit";
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<AuditEventResponse> request = new HttpEntity<>(event, headers);
+            HttpEntity<AuditEvent> request = new HttpEntity<>(event, headers);
 
             ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
             if (response.getStatusCode().is2xxSuccessful()) {

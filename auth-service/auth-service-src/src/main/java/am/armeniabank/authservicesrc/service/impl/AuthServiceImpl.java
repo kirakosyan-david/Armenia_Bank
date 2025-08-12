@@ -2,7 +2,7 @@ package am.armeniabank.authservicesrc.service.impl;
 
 import am.armeniabank.authserviceapi.request.LoginRequest;
 import am.armeniabank.authserviceapi.request.RefreshTokenRequest;
-import am.armeniabank.authserviceapi.response.AuditEventResponse;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.TokenResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
 import am.armeniabank.authservicesrc.cilent.AuditClient;
@@ -83,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
             UserEmailSearchResponse userDto = userService.searchByEmail(login.getEmail());
             userService.updateLastLogin(userDto.getId());
 
-            AuditEventResponse auditEvent = new AuditEventResponse(
+            AuditEvent auditEvent = new AuditEvent(
                     "auth-service",
                     "USER_ONELOGIN",
                     "User login with username: " + login.getEmail(),

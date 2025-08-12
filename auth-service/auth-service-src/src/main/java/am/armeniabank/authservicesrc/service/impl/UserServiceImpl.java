@@ -2,7 +2,10 @@ package am.armeniabank.authservicesrc.service.impl;
 
 import am.armeniabank.authserviceapi.emuns.UserRole;
 import am.armeniabank.authserviceapi.request.UserUpdateRequest;
-import am.armeniabank.authserviceapi.response.AuditEventResponse;
+import am.armeniabank.authservicesrc.handler.UserEventHandler;
+import am.armeniabank.authservicesrc.handler.impl.UserUpdateHandler;
+import am.armeniabank.authservicesrc.kafka.enumeration.UserEventType;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UpdateUserResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
 import am.armeniabank.authserviceapi.response.UserResponse;
@@ -10,14 +13,16 @@ import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.entity.UserVerification;
+import am.armeniabank.authservicesrc.kafka.model.UserEvent;
 import am.armeniabank.authservicesrc.mapper.UserMapper;
 import am.armeniabank.authservicesrc.repository.UserRepository;
 import am.armeniabank.authservicesrc.service.KeycloakService;
 import am.armeniabank.authservicesrc.service.MailService;
 import am.armeniabank.authservicesrc.service.UserService;
 import am.armeniabank.authservicesrc.util.SecurityUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,7 +39,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
 
@@ -45,6 +49,29 @@ public class UserServiceImpl implements UserService {
     private final AuditClient auditClient;
     private final MailService mailService;
     private final CacheManager cacheManager;
+    private final UserEventHandler userUpdateHandler;
+    private final UserEventHandler userDeleteHandler;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository,
+                           UserMapper userMapper,
+                           PasswordEncoder passwordEncoder,
+                           KeycloakService keycloakService,
+                           AuditClient auditClient,
+                           MailService mailService,
+                           CacheManager cacheManager,
+                           @Qualifier("userUpdateHandler") UserEventHandler userUpdateHandler,
+                           @Qualifier("userDeleteHandler") UserEventHandler userDeleteHandler) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.keycloakService = keycloakService;
+        this.auditClient = auditClient;
+        this.mailService = mailService;
+        this.cacheManager = cacheManager;
+        this.userUpdateHandler = userUpdateHandler;
+        this.userDeleteHandler = userDeleteHandler;
+    }
 
     @Override
     @Cacheable(value = "userByEmail", key = "#email")
@@ -101,14 +128,9 @@ public class UserServiceImpl implements UserService {
 
         keycloakService.updateUserInKeycloak(oldEmail, request, user.getRole());
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
-                "auth-service",
-                "USER_UPDATED",
-                "User Update with username: " + request.getEmail(),
-                LocalDateTime.now()
-        );
+        auditEvetConsumer(request);
 
-        auditClient.sendAuditEvent(auditEvent);
+        userEventUpdateProducer(user);
 
         return userMapper.toUserUpdateDto(user, user.getVerification());
     }
@@ -134,6 +156,8 @@ public class UserServiceImpl implements UserService {
         log.info("The user with email address {} has been removed from the database.", user.getEmail());
 
         evictCacheManual(user.getEmail(), user.getId());
+
+        userEventDeleteProducer(user);
     }
 
     protected void evictCacheManual(String email, UUID id) {
@@ -156,6 +180,47 @@ public class UserServiceImpl implements UserService {
     private User findUserById(UUID id) {
         return userRepository.findById(id).orElseThrow(() ->
                 new UsernameNotFoundException("User with ID " + id + " not found"));
+    }
+
+    private void auditEvetConsumer(UserUpdateRequest request) {
+        AuditEvent auditEvent = new AuditEvent(
+                "auth-service",
+                "USER_UPDATED",
+                "User Update with username: " + request.getEmail(),
+                LocalDateTime.now()
+        );
+
+        auditClient.sendAuditEvent(auditEvent);
+    }
+
+    private void userEventUpdateProducer(User userSaved) {
+        UserEvent userEvent = UserEvent.builder()
+                .id(userSaved.getId())
+                .firstName(userSaved.getProfile().getFirstName())
+                .lastName(userSaved.getProfile().getLastName())
+                .patronymic(userSaved.getProfile().getPatronymic())
+                .email(userSaved.getEmail())
+                .emailVerified(userSaved.isEmailVerified())
+                .role(userSaved.getRole().name())
+                .type(UserEventType.UPDATED)
+                .createdAt(LocalDateTime.now())
+                .build();
+        userUpdateHandler.handle(userEvent);
+    }
+
+    private void userEventDeleteProducer(User userSaved) {
+        UserEvent userEvent = UserEvent.builder()
+                .id(userSaved.getId())
+                .firstName(userSaved.getProfile().getFirstName())
+                .lastName(userSaved.getProfile().getLastName())
+                .patronymic(userSaved.getProfile().getPatronymic())
+                .email(userSaved.getEmail())
+                .emailVerified(userSaved.isEmailVerified())
+                .role(userSaved.getRole().name())
+                .type(UserEventType.DELETED)
+                .createdAt(LocalDateTime.now())
+                .build();
+        userDeleteHandler.handle(userEvent);
     }
 
 }

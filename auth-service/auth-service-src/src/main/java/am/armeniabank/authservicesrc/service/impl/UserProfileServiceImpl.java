@@ -3,7 +3,7 @@ package am.armeniabank.authservicesrc.service.impl;
 import am.armeniabank.authserviceapi.emuns.Gender;
 import am.armeniabank.authserviceapi.request.UserProfileRequest;
 import am.armeniabank.authserviceapi.request.UserProfileUpdateRequest;
-import am.armeniabank.authserviceapi.response.AuditEventResponse;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UserProfileResponse;
 import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.entity.UserProfile;
@@ -48,7 +48,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         UserProfile savedProfile = userProfileRepository.save(userProfile);
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "USER_PROFILE_CREATED",
                 "User Profile Create with username: " + userProfile.getUser().getEmail(),
@@ -94,7 +94,7 @@ public class UserProfileServiceImpl implements UserProfileService {
             log.error("Failed to update Keycloak user profile for userId {}", userId, e);
         }
 
-        AuditEventResponse auditEvent = new AuditEventResponse(
+        AuditEvent auditEvent = new AuditEvent(
                 "auth-service",
                 "USER_PROFILE_UPDATED",
                 "User Profile Update with username: " + userProfile.getUser().getEmail(),

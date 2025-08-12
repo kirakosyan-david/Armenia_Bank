@@ -1,4 +1,4 @@
-package am.armeniabank.authserviceapi.response;
+package am.armeniabank.authservicesrc.kafka.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuditEventResponse {
+public class AuditEvent {
+
     private String service;
     private String eventType;
     private String details;

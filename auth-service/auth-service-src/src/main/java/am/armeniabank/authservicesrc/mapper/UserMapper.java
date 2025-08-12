@@ -7,6 +7,7 @@ import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.entity.UserVerification;
+import am.armeniabank.authservicesrc.kafka.model.UserEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -82,4 +83,14 @@ public interface UserMapper {
     @Mapping(source = "user.emailVerified", target = "emailVerified")
     @Mapping(source = "userVerification.passportNumber", target = "passportNumber")
     UpdateUserResponse toUserUpdateDto(User user, UserVerification userVerification);
+
+//    @Mapping(source = "user.id", target = "id")
+//    @Mapping(source = "userProfile.firstName", target = "firstName")
+//    @Mapping(source = "userProfile.lastName", target = "lastName")
+//    @Mapping(source = "userProfile.patronymic", target = "patronymic")
+//    @Mapping(source = "user.email", target = "email")
+//    @Mapping(source = "user.emailVerified", target = "emailVerified")
+//    @Mapping(source = "user.role", target = "role")
+//    @Mapping(source = "user.createdAt", target = "createdAt")
+//    UserEvent toEvent(User user);
 }
