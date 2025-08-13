@@ -5,7 +5,7 @@ import am.armeniabank.authserviceapi.request.UserProfileRequest;
 import am.armeniabank.authserviceapi.request.UserProfileUpdateRequest;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UserProfileResponse;
-import am.armeniabank.authservicesrc.cilent.AuditClient;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.mapper.UserProfileMapper;
 import am.armeniabank.authservicesrc.repository.UserProfileRepository;
@@ -30,7 +30,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
     private final KeycloakService keycloakService;
-    private final AuditClient auditClient;
+    private final AuditServiceClient auditClient;
 
     @Override
     @Cacheable(value = "userById", key = "#userId")

@@ -2,10 +2,10 @@ package am.armeniabank.authservicesrc.service.impl;
 
 import am.armeniabank.authserviceapi.request.LoginRequest;
 import am.armeniabank.authserviceapi.request.RefreshTokenRequest;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.TokenResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
-import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.service.AuthService;
 import am.armeniabank.authservicesrc.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ import java.util.Map;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    private final AuditClient auditClient;
+    private final AuditServiceClient auditClient;
 
     private final RestTemplate restTemplate;
 

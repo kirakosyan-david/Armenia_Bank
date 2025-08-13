@@ -14,9 +14,12 @@ public interface KeycloakService {
 
     void updateUserInKeycloak(String currentEmail, UserUpdateRequest request, UserRole role);
 
+    void updateEmailVerified(String email, boolean verified);
+
     boolean deleteUserFromKeycloak(String email);
 
     void updateKeycloakUserProfile(UUID userId, String newFirstName, String newLastName);
 
     String getKeycloakUserIdByEmail(String email);
+
 }

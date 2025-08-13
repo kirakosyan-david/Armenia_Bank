@@ -22,7 +22,8 @@ public class UserEventConsumer implements EventConsumer<UserEvent> {
     private final List<UserEventHandler> handlers;
 
     @Override
-    @KafkaListener(topics = "${spring.kafka.topic.user-events}")
+    @KafkaListener(topics = "${spring.kafka.topic.user-events}",
+            containerFactory = "userEventKafkaListenerFactory")
     public void handle(UserEvent event) {
         handlers.stream()
                 .filter(handler -> handler.isHandle(event))

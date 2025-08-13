@@ -1,7 +1,7 @@
 package am.armeniabank.authservicesrc.handler.impl;
 
 import am.armeniabank.authservicesrc.handler.UserEventHandler;
-import am.armeniabank.authservicesrc.kafka.enumeration.UserEventType;
+import am.armeniabank.authservicesrc.kafka.model.enumeration.UserEventType;
 import am.armeniabank.authservicesrc.kafka.model.UserEvent;
 import am.armeniabank.authservicesrc.repository.UserRepository;
 import am.armeniabank.authservicesrc.service.MailService;

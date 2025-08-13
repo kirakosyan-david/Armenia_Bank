@@ -1,4 +1,4 @@
-package am.armeniabank.authservicesrc.kafka.enumeration;
+package am.armeniabank.authservicesrc.kafka.model.enumeration;
 
 public enum UserEventType {
 

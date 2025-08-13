@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserEventProducer implements EventProducer<UserEvent> {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, UserEvent> kafkaTemplate;
 
     @Value("${spring.kafka.topic.user-events}")
     private String topic;

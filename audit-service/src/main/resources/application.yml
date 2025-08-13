@@ -22,16 +22,15 @@ spring:
     bootstrap-servers: kafka:9092
     consumer:
       group-id: my-group
-      auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-kafka:
-  topic:
-    audit-events: audit-events
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topic:
+      audit-events: audit-events-topic
 
 archive:
   audit: D:/Test_Task/Armenia_Bank/archive/audit_

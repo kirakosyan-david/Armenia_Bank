@@ -1,6 +1,6 @@
 package am.armeniabank.authservicesrc.kafka.model;
 
-import am.armeniabank.authservicesrc.kafka.enumeration.UserEventType;
+import am.armeniabank.authservicesrc.kafka.model.enumeration.UserEventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

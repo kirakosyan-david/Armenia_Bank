@@ -6,6 +6,7 @@ import am.armeniabank.authserviceapi.request.RefreshTokenRequest;
 import am.armeniabank.authserviceapi.request.UserRegistrationRequest;
 import am.armeniabank.authserviceapi.response.TokenResponse;
 import am.armeniabank.authserviceapi.response.UserDto;
+import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;
 import am.armeniabank.authservicesrc.exception.custom.UserLoginException;
 import am.armeniabank.authservicesrc.exception.custom.UserServerError;
 import am.armeniabank.authservicesrc.service.AuthService;
@@ -30,6 +31,9 @@ public class AuthControllerImpl implements AuthController {
         try {
             UserDto result = userRegisterService.register(register);
             return ResponseEntity.ok(result);
+        } catch (EmailAlreadyExistsException e) {
+            log.warn("Registration failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         } catch (UserServerError e) {
             log.error("Registration failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

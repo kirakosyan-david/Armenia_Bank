@@ -1,4 +1,4 @@
-package am.armeniabank.authservicesrc.cilent;
+package am.armeniabank.authservicesrc.integration;
 
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +13,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 @Slf4j
-public class AuditClient {
+public class AuditServiceClient {
 
     private final RestTemplate restTemplate;
     private final String auditServiceUrl;
 
-    public AuditClient(@Value("${audit-service.url}") String auditServiceUrl) {
+    public AuditServiceClient(@Value("${audit-service.url}") String auditServiceUrl) {
         this.restTemplate = new RestTemplate();
         this.auditServiceUrl = auditServiceUrl;
     }

@@ -9,9 +9,9 @@ import am.armeniabank.authserviceapi.request.ApproveVerificationRequest;
 import am.armeniabank.authserviceapi.request.RejectVerificationRequest;
 import am.armeniabank.authserviceapi.request.StartVerificationRequest;
 import am.armeniabank.authserviceapi.request.UploadDocumentRequest;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UserVerificationResponse;
-import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.entity.UserVerification;
 import am.armeniabank.authservicesrc.mapper.UserVerificationMapper;
 import am.armeniabank.authservicesrc.repository.UserVerificationRepository;
@@ -37,7 +37,7 @@ public class UserVerificationServiceImpl implements UserVerificationService {
 
     private final UserVerificationRepository userVerificationRepository;
     private final UserVerificationMapper userVerificationMapper;
-    private final AuditClient auditClient;
+    private final AuditServiceClient auditClient;
 
     @Value("${user.verification.picture.path}")
     private String fileDocumentUrl;

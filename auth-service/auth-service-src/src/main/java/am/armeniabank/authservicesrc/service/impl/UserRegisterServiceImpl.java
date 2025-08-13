@@ -3,20 +3,20 @@ package am.armeniabank.authservicesrc.service.impl;
 import am.armeniabank.authserviceapi.emuns.Gender;
 import am.armeniabank.authserviceapi.emuns.UserRole;
 import am.armeniabank.authserviceapi.request.UserRegistrationRequest;
-import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UserDto;
-import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
+import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;
 import am.armeniabank.authservicesrc.handler.UserEventHandler;
-import am.armeniabank.authservicesrc.kafka.enumeration.UserEventType;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authservicesrc.kafka.model.UserEvent;
+import am.armeniabank.authservicesrc.kafka.model.enumeration.UserEventType;
 import am.armeniabank.authservicesrc.mapper.UserMapper;
 import am.armeniabank.authservicesrc.repository.UserRepository;
 import am.armeniabank.authservicesrc.service.KeycloakService;
 import am.armeniabank.authservicesrc.service.MailService;
 import am.armeniabank.authservicesrc.service.UserRegisterService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,7 +37,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final AuditClient auditClient;
+    private final AuditServiceClient auditClient;
 
     private final KeycloakService keycloakService;
 
@@ -49,7 +49,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
     public UserRegisterServiceImpl(UserRepository userRepository,
                                    UserMapper userMapper,
                                    PasswordEncoder passwordEncoder,
-                                   AuditClient auditClient,
+                                   AuditServiceClient auditClient,
                                    KeycloakService keycloakService,
                                    MailService mailService,
                                    @Qualifier("userCreateHandler") UserEventHandler userEventHandler) {
@@ -68,11 +68,11 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         log.info("Registering user: {}", register.getEmail());
 
         if (userRepository.existsByEmail(register.getEmail())) {
-            throw new RuntimeException("Email already exists in DB");
+            throw new EmailAlreadyExistsException("Email already exists in database");
         }
 
         if (keycloakService.emailExistsInKeycloak(register.getEmail())) {
-            throw new RuntimeException("Email already exists in Keycloak");
+            throw new EmailAlreadyExistsException("Email already exists in Keycloak");
         }
 
         User user = User.builder()
@@ -92,9 +92,9 @@ public class UserRegisterServiceImpl implements UserRegisterService {
 
         user.setProfile(profile);
 
-        User userSaved = userRepository.save(user);
-
         mailService.sendVerificationEmail(user, register.getPassportNumber());
+
+        User userSaved = userRepository.save(user);
 
         keycloakService.createUserInKeycloak(register, user.getRole());
 

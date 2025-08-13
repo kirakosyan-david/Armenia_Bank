@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditKafkaConsumer {
 
-    @KafkaListener(topics = "${kafka.topic.audit-events}", groupId = "audit-service")
+    @KafkaListener(topics = "${spring.kafka.topic.audit-events}", groupId = "audit-service")
     public void consumeAuditEvent(AuditEventDto event) {
         log.info("Получено audit-событие: {}", event);
     }

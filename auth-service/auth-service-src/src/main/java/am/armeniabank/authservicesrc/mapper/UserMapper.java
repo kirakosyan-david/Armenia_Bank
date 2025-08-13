@@ -84,13 +84,4 @@ public interface UserMapper {
     @Mapping(source = "userVerification.passportNumber", target = "passportNumber")
     UpdateUserResponse toUserUpdateDto(User user, UserVerification userVerification);
 
-//    @Mapping(source = "user.id", target = "id")
-//    @Mapping(source = "userProfile.firstName", target = "firstName")
-//    @Mapping(source = "userProfile.lastName", target = "lastName")
-//    @Mapping(source = "userProfile.patronymic", target = "patronymic")
-//    @Mapping(source = "user.email", target = "email")
-//    @Mapping(source = "user.emailVerified", target = "emailVerified")
-//    @Mapping(source = "user.role", target = "role")
-//    @Mapping(source = "user.createdAt", target = "createdAt")
-//    UserEvent toEvent(User user);
 }

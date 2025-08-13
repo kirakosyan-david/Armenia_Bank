@@ -3,9 +3,11 @@ package am.armeniabank.authservicesrc.exception;
 import am.armeniabank.authserviceapi.response.RestErrorResponse;
 import am.armeniabank.authservicesrc.exception.custom.ChangePasswordException;
 import am.armeniabank.authservicesrc.exception.custom.DeleteNotFoundException;
+import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;
 import am.armeniabank.authservicesrc.exception.custom.SendMessageException;
 import am.armeniabank.authservicesrc.exception.custom.UserServerError;
 import am.armeniabank.authservicesrc.exception.custom.WrongUserIdException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -23,8 +25,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException e) {
+        log.warn("Registration failed: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 
     @ExceptionHandler(value = {
             DeleteNotFoundException.class,

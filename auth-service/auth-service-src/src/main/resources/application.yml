@@ -67,12 +67,13 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.value.default.type: am.armeniabank.authservicesrc.kafka.model.UserEvent
+        spring.json.trusted.packages: "*"
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topic:
       user-events: user-events-topic
+      audit-events: audit-events-topic
 
   servlet:
     multipart:
@@ -93,10 +94,6 @@ springdoc:
 
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
-
-kafka:
-  topic:
-    auth-events: auth-events
 
 audit-service:
   url: http://audit-service:8082

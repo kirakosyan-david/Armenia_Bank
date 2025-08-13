@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 public class AuditEventConsumer implements EventConsumer<AuditEvent> {
 
     @Override
-    @KafkaListener(topics = "${kafka.topic.auth-events}", groupId = "auth-service")
+    @KafkaListener(topics = "${spring.kafka.topic.audit-events}",
+            groupId = "auth-service", containerFactory = "auditEventKafkaListenerFactory")
     public void handle(AuditEvent event) {
         log.info("Audit event received: {}", event);
     }

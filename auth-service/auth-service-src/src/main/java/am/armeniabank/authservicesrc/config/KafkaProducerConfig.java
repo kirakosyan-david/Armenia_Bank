@@ -1,5 +1,7 @@
 package am.armeniabank.authservicesrc.config;
 
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
+import am.armeniabank.authservicesrc.kafka.model.UserEvent;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -18,14 +20,28 @@ import java.util.Map;
 public class KafkaProducerConfig {
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(props);
+    public ProducerFactory<String, UserEvent> userEventProducerFactory(KafkaProperties props) {
+        Map<String, Object> config = new HashMap<>(props.buildProducerProperties());
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
+    public KafkaTemplate<String, UserEvent> userEventKafkaTemplate(
+            ProducerFactory<String, UserEvent> pf) {
+        return new KafkaTemplate<>(pf);
+    }
+
+    @Bean
+    public ProducerFactory<String, AuditEvent> auditEventProducerFactory(KafkaProperties props) {
+        Map<String, Object> config = new HashMap<>(props.buildProducerProperties());
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, AuditEvent> auditEventKafkaTemplate(
+            ProducerFactory<String, AuditEvent> pf) {
+        return new KafkaTemplate<>(pf);
     }
 }

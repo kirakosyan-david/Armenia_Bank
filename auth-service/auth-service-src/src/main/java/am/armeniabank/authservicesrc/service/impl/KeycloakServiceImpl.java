@@ -191,12 +191,39 @@ public class KeycloakServiceImpl implements KeycloakService {
         log.info("Keycloak user updated: {}", userId);
     }
 
+    @Override
+    public void updateEmailVerified(String email, boolean verified) {
+        String userId = getUserIdByEmail(email);
+        if (userId == null) {
+            log.error("User with email address {} not found in Keycloak", email);
+            throw new RuntimeException("User not found in Keycloak: " + email);
+        }
+
+        String accessToken = getAdminAccessToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("emailVerified", verified);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        restTemplate.put(
+                keycloakBaseUrl + "/admin/realms/" + realm + "/users/" + userId,
+                request
+        );
+
+        log.info("Email verification status updated in Keycloak for user {}: {}", email, verified);
+    }
+
 
     @Override
     public boolean deleteUserFromKeycloak(String email) {
         String userId = getUserIdByEmail(email); // теперь правильно
         if (userId == null) {
-            log.error("Пользователь с email {} не найден в Keycloak", email);
+            log.error("User with email address {} not found in Keycloak", email);
             return false;
         }
         try {

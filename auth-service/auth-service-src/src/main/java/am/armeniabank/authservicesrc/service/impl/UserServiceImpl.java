@@ -2,14 +2,13 @@ package am.armeniabank.authservicesrc.service.impl;
 
 import am.armeniabank.authserviceapi.emuns.UserRole;
 import am.armeniabank.authserviceapi.request.UserUpdateRequest;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
 import am.armeniabank.authservicesrc.handler.UserEventHandler;
-import am.armeniabank.authservicesrc.handler.impl.UserUpdateHandler;
-import am.armeniabank.authservicesrc.kafka.enumeration.UserEventType;
+import am.armeniabank.authservicesrc.kafka.model.enumeration.UserEventType;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UpdateUserResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
 import am.armeniabank.authserviceapi.response.UserResponse;
-import am.armeniabank.authservicesrc.cilent.AuditClient;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.entity.UserVerification;
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final KeycloakService keycloakService;
-    private final AuditClient auditClient;
+    private final AuditServiceClient auditClient;
     private final MailService mailService;
     private final CacheManager cacheManager;
     private final UserEventHandler userUpdateHandler;
@@ -57,7 +56,7 @@ public class UserServiceImpl implements UserService {
                            UserMapper userMapper,
                            PasswordEncoder passwordEncoder,
                            KeycloakService keycloakService,
-                           AuditClient auditClient,
+                           AuditServiceClient auditClient,
                            MailService mailService,
                            CacheManager cacheManager,
                            @Qualifier("userUpdateHandler") UserEventHandler userUpdateHandler,
@@ -112,7 +111,7 @@ public class UserServiceImpl implements UserService {
         String oldEmail = userById.getEmail();
 
         boolean isEmail = keycloakService.emailExistsInKeycloak(oldEmail);
-        if (isEmail) {
+        if (!isEmail) {
             log.error("User with email {} not found in Keycloak", oldEmail);
         }
 
@@ -123,8 +122,6 @@ public class UserServiceImpl implements UserService {
         userById.setUpdatedAt(LocalDateTime.now());
 
         User user = userRepository.save(userById);
-
-        mailService.sendVerificationUpdateEmail(user);
 
         keycloakService.updateUserInKeycloak(oldEmail, request, user.getRole());
 
