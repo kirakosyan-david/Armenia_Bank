@@ -1,0 +1,14 @@
+package am.armeniabank.auditservicesrc;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
+
+@SpringBootApplication(exclude = KafkaAutoConfiguration.class)
+public class AuditServiceSrcApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(AuditServiceSrcApplication.class, args);
+    }
+
+}

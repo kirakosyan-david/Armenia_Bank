@@ -1,6 +1,7 @@
 package am.armeniabank.authservicesrc.integration;
 
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -13,18 +14,16 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AuditServiceClient {
 
     private final RestTemplate restTemplate;
-    private final String auditServiceUrl;
 
-    public AuditServiceClient(@Value("${audit-service.url}") String auditServiceUrl) {
-        this.restTemplate = new RestTemplate();
-        this.auditServiceUrl = auditServiceUrl;
-    }
+    @Value("${audit-service.url}")
+    private String auditServiceUrl;
 
     public void sendAuditEvent(AuditEvent event) {
-        String url = auditServiceUrl + "/api/audit";
+        String url = auditServiceUrl + "/api/audit/user";
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
