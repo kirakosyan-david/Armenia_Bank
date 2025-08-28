@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm
+  namespace: armenia-bank
+data:
+  realm-export.json: |
+    {
+      "id": "ArmeniaBank",
+      "realm": "ArmeniaBank",
+      "enabled": true,
+      "displayName": "Armenia Bank Realm",
+      "loginTheme": "keycloak",
+      "sslRequired": "none",
+      "registrationAllowed": true,
+      "editUsernameAllowed": false,
+      "resetPasswordAllowed": true,
+      "verifyEmail": false,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "defaultDefaultClientScopes": [
+        "profile",
+        "email",
+        "roles",
+        "web-origins"
+      ],
+      "clients": [
+        {
+          "clientId": "backend-gateway-client",
+          "enabled": true,
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "secret": "gateway-service",
+          "redirectUris": [
+            "http://localhost:9090/*"
+          ],
+          "webOrigins": ["+"],
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": true,
+          "attributes": {
+            "access.token.lifespan": "300",
+            "refresh.token.lifespan": "1800"
+          }
+        },
+        {
+          "clientId": "auth-service",
+          "enabled": true,
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "secret": "auth-service",
+          "redirectUris": [
+            "http://localhost:8081/swagger-ui/oauth2-redirect.html"
+          ],
+          "webOrigins": ["+"],
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": true,
+          "attributes": {
+            "access.token.lifespan": "300",
+            "refresh.token.lifespan": "1800"
+          }
+        },
+        {
+          "clientId": "audit-service",
+          "enabled": true,
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "secret": "audit-service",
+          "redirectUris": [],
+          "webOrigins": ["+"],
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": true,
+          "standardFlowEnabled": false,
+          "directAccessGrantsEnabled": true,
+          "attributes": {
+            "access.token.lifespan": "300",
+            "refresh.token.lifespan": "1800"
+          }
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "ROLE_ADMIN",
+            "description": "Administrator role"
+          },
+          {
+            "name": "ROLE_USER",
+            "description": "Regular user role"
+          },
+          {
+            "name": "realm-management/manage-users",
+            "description": "Manage users via Admin API"
+          }
+        ],
+        "client": {
+          "auth-service": [
+            {
+              "name": "service-role",
+              "description": "Auth-service role"
+            }
+          ]
+        }
+      }
+    }

@@ -1,0 +1,19 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd
+                   http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="000" author="David Kirakosyan">
+        <sql>SET SEARCH_PATH TO auth_service, public;</sql>
+    </changeSet>
+
+    <include file="/db/migration/changelog/001-create-wallet-currency-type.xml"/>
+    <include file="/db/migration/changelog/002-create-wallet-status.xml"/>
+    <include file="/db/migration/changelog/003-create-wallet-operation-type.xml"/>
+    <include file="/db/migration/changelog/004-create-wallet-operation-reason-type.xml"/>
+    <include file="/db/migration/changelog/005-create-wallet-table.xml"/>
+    <include file="/db/migration/changelog/006-create-wallet-operations-table.xml"/>
+
+
+</databaseChangeLog>
