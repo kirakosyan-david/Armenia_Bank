@@ -1,5 +1,6 @@
 package am.armeniabank.walletservicesrc.repository;
 
+import am.armeniabank.walletserviceapi.enums.Currency;
 import am.armeniabank.walletservicesrc.entity.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,7 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
     Optional<Wallet> findWalletByUserId(UUID userId);
 
     List<Wallet> findAllByUserId(UUID userId);
+
+    Optional<Wallet> findByUserIdAndCurrency(UUID userId, Currency currency);
 
 }
