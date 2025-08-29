@@ -6,7 +6,6 @@ import am.armeniabank.walletserviceapi.enums.WalletStatus;
 import am.armeniabank.walletserviceapi.response.UserResponse;
 import am.armeniabank.walletserviceapi.response.WalletResponse;
 import am.armeniabank.walletservicesrc.entity.Wallet;
-import am.armeniabank.walletservicesrc.entity.WalletOperation;
 import am.armeniabank.walletservicesrc.mapper.WalletMapper;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
 import am.armeniabank.walletservicesrc.security.SecurityUtils;
@@ -55,7 +54,8 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public WalletResponse getWalletById(UUID walletId) {
-        Wallet wallet = walletRepository.findById(walletId).orElseThrow(RuntimeException::new);
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
 
         String token = SecurityUtils.getCurrentToken();
 
@@ -66,48 +66,50 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public List<WalletResponse> getWalletsByUserId(UUID userId) {
-        return List.of();
+        List<Wallet> wallets = walletRepository.findAllByUserId(userId);
+        String token = SecurityUtils.getCurrentToken();
+
+        UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
+
+        return wallets.stream()
+                .map(wallet -> walletMapper.toWalletResponse(wallet, userById))
+                .toList();
     }
 
     @Override
     public WalletResponse blockWallet(UUID walletId) {
-        return null;
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+        wallet.setStatus(WalletStatus.BLOCKED);
+        walletRepository.save(wallet);
+        String token = SecurityUtils.getCurrentToken();
+
+        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        return walletMapper.toWalletResponse(wallet, userById);
     }
 
     @Override
     public WalletResponse unblockWallet(UUID walletId) {
-        return null;
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+        wallet.setStatus(WalletStatus.ACTIVE);
+        walletRepository.save(wallet);
+        String token = SecurityUtils.getCurrentToken();
+
+        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        return walletMapper.toWalletResponse(wallet, userById);
     }
 
     @Override
     public WalletResponse closeWallet(UUID walletId) {
-        return null;
-    }
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+        wallet.setStatus(WalletStatus.CLOSED);
+        walletRepository.save(wallet);
+        String token = SecurityUtils.getCurrentToken();
 
-    @Override
-    public WalletResponse credit(UUID walletId, BigDecimal amount, String reason) {
-        return null;
+        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        return walletMapper.toWalletResponse(wallet, userById);
     }
-
-    @Override
-    public WalletResponse debit(UUID walletId, BigDecimal amount, String reason) {
-        return null;
-    }
-
-    @Override
-    public WalletResponse freeze(UUID walletId, BigDecimal amount, String reason) {
-        return null;
-    }
-
-    @Override
-    public WalletResponse unfreeze(UUID walletId, BigDecimal amount, String reason) {
-        return null;
-    }
-
-    @Override
-    public List<WalletOperation> getOperations(UUID walletId) {
-        return List.of();
-    }
-
 
 }
