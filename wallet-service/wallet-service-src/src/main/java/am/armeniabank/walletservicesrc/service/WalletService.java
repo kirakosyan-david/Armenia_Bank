@@ -8,7 +8,6 @@ import java.util.UUID;
 
 public interface WalletService {
 
-    // Управление кошельками
     WalletResponse createWallet(UUID userId, Currency currency);
     WalletResponse getWalletById(UUID walletId);
     List<WalletResponse> getWalletsByUserId(UUID userId);
