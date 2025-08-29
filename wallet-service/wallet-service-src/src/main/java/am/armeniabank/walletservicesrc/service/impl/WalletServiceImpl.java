@@ -29,8 +29,8 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public WalletResponse createWallet(UUID userId, Currency currency) {
 
-        if (walletRepository.findWalletByUserId(userId).isPresent()) {
-            throw new RuntimeException("Wallet already exists for user: " + userId);
+        if (walletRepository.findByUserIdAndCurrency(userId, currency).isPresent()) {
+            throw new RuntimeException("Wallet already exists for user: " + userId + " with currency: " + currency);
         }
 
         String token = SecurityUtils.getCurrentToken();
