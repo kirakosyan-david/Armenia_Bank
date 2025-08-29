@@ -14,4 +14,5 @@ public interface WalletMapper {
     @Mapping(source = "user.firstName", target = "firstName")
     @Mapping(source = "user.lastName", target = "lastName")
     WalletResponse toWalletResponse(Wallet wallet, UserResponse user);
+
 }

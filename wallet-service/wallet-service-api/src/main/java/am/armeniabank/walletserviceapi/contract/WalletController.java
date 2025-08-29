@@ -12,9 +12,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequestMapping(ApiConstants.WALLET_SERVICE_URL)
@@ -36,18 +38,36 @@ public interface WalletController {
     ResponseEntity<WalletResponse> createWallet(@PathVariable("userId") UUID userId,
                                                 @RequestParam Currency currency);
 
-    @Operation(
-            summary = "Get wallet by ID",
-            description = "Retrieves the wallet details for the specified wallet ID"
-    )
+    @Operation(summary = "Get wallet by ID",
+            description = "Retrieves the wallet details for the specified wallet ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Wallet retrieved successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid wallet ID format"),
-            @ApiResponse(responseCode = "401", description = "User not authenticated"),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "404", description = "Wallet not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "Wallet not found")
     })
     @GetMapping("/{walletId}")
     ResponseEntity<WalletResponse> getWalletById(@PathVariable("walletId") UUID walletId);
+
+    @Operation(summary = "Get wallets by User ID",
+            description = "Retrieves all wallets for the specified user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Wallets retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @GetMapping("/{userId}/users")
+    ResponseEntity<List<WalletResponse>> getWalletsByUserId(@PathVariable("userId") UUID userId);
+
+    @Operation(summary = "Block wallet",
+            description = "Blocks the specified wallet, preventing further operations")
+    @PutMapping("/{walletId}/block")
+    ResponseEntity<WalletResponse> blockWallet(@PathVariable("walletId") UUID walletId);
+
+    @Operation(summary = "Unblock wallet",
+            description = "Unblocks the specified wallet, allowing operations again")
+    @PutMapping("/{walletId}/unblock")
+    ResponseEntity<WalletResponse> unblockWallet(@PathVariable("walletId") UUID walletId);
+
+    @Operation(summary = "Close wallet",
+            description = "Closes the specified wallet permanently")
+    @PutMapping("/{walletId}/close")
+    ResponseEntity<WalletResponse> closeWallet(@PathVariable("walletId") UUID walletId);
 }
