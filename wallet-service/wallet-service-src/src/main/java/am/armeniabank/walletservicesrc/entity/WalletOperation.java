@@ -42,7 +42,7 @@ public class WalletOperation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private WalletOperationReason reason;
+    private WalletOperationReason walletOperationReason;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
