@@ -1,8 +1,7 @@
 package am.armeniabank.walletservicesrc.service;
 
 import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
-import am.armeniabank.walletserviceapi.response.WalletResponse;
-import am.armeniabank.walletservicesrc.entity.WalletOperation;
+import am.armeniabank.walletserviceapi.response.WalletOperationResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,10 +9,10 @@ import java.util.UUID;
 public interface WalletOperationService {
 
 
-    WalletResponse credit(UUID walletId, WalletOperationRequest reason);
-    WalletResponse debit(UUID walletId, WalletOperationRequest reason);
-    WalletResponse freeze(UUID walletId, WalletOperationRequest reason);
-    WalletResponse unfreeze(UUID walletId, WalletOperationRequest reason);
+    WalletOperationResponse credit(UUID walletId, WalletOperationRequest reason);
+    WalletOperationResponse debit(UUID walletId, WalletOperationRequest reason);
+    WalletOperationResponse freeze(UUID walletId, WalletOperationRequest reason);
+    WalletOperationResponse unfreeze(UUID walletId, WalletOperationRequest reason);
 
-    List<WalletOperation> getOperations(UUID walletId);
+    List<WalletOperationResponse> getOperations(UUID walletId);
 }
