@@ -11,6 +11,6 @@ public class AuditKafkaConsumer {
 
     @KafkaListener(topics = "${spring.kafka.topic.audit-events}", groupId = "audit-service")
     public void consumeAuditEvent(AuditUserEvent event) {
-        log.info("Получено audit-событие: {}", event);
+        log.info("Audit event received: {}", event);
     }
 }

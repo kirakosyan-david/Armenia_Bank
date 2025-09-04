@@ -42,6 +42,9 @@ public class Wallet {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
+    @Column(name = "frozen_balance", nullable = false)
+    private BigDecimal frozenBalance = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WalletStatus status;

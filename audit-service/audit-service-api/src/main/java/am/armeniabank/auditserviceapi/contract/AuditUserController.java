@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping(ApiConstants.AUDIT_USER_SERVICE_URL)
-public interface AuditController {
+public interface AuditUserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<AuditUserEventResponse> audit(@RequestBody AuditUserEventRequest request);
+    ResponseEntity<AuditUserEventResponse> auditUserSaved(@RequestBody AuditUserEventRequest request);
 }
