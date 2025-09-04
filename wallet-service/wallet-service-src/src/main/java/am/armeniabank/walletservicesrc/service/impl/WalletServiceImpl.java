@@ -6,6 +6,8 @@ import am.armeniabank.walletserviceapi.enums.WalletStatus;
 import am.armeniabank.walletserviceapi.response.UserResponse;
 import am.armeniabank.walletserviceapi.response.WalletResponse;
 import am.armeniabank.walletservicesrc.entity.Wallet;
+import am.armeniabank.walletservicesrc.integration.AuditServiceClient;
+import am.armeniabank.walletservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.walletservicesrc.mapper.WalletMapper;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
 import am.armeniabank.walletservicesrc.security.SecurityUtils;
@@ -25,6 +27,7 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final WalletMapper walletMapper;
     private final UserApi userApi;
+    private final AuditServiceClient auditClient;
 
     @Override
     public WalletResponse createWallet(UUID userId, Currency currency) {
@@ -46,8 +49,9 @@ public class WalletServiceImpl implements WalletService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-
         Wallet walletSaved = walletRepository.save(wallet);
+
+        auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-CREATED");
 
         return walletMapper.toWalletResponse(walletSaved, userById);
     }
@@ -85,6 +89,8 @@ public class WalletServiceImpl implements WalletService {
         String token = SecurityUtils.getCurrentToken();
 
         UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+
+        auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-BLOCKED");
         return walletMapper.toWalletResponse(wallet, userById);
     }
 
@@ -97,6 +103,9 @@ public class WalletServiceImpl implements WalletService {
         String token = SecurityUtils.getCurrentToken();
 
         UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+
+        auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-UNBLOCKED");
+
         return walletMapper.toWalletResponse(wallet, userById);
     }
 
@@ -109,6 +118,9 @@ public class WalletServiceImpl implements WalletService {
         String token = SecurityUtils.getCurrentToken();
 
         UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+
+        auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-CLOSED");
+
         return walletMapper.toWalletResponse(wallet, userById);
     }
 

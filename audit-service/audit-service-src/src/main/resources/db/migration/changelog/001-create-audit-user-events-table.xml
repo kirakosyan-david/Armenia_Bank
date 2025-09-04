@@ -11,7 +11,7 @@
                                           service VARCHAR(100),
                                           event_type VARCHAR(100),
                                           details TEXT,
-                                          created_at TIMESTAMP
+                                          created_at TIMESTAMP NOT NULL DEFAULT now()
             );
         </sql>
     </changeSet>

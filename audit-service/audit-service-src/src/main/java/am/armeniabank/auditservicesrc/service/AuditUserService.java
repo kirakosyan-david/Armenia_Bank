@@ -3,7 +3,7 @@ package am.armeniabank.auditservicesrc.service;
 import am.armeniabank.auditserviceapi.request.AuditUserEventRequest;
 import am.armeniabank.auditserviceapi.response.AuditUserEventResponse;
 
-public interface AuditService {
+public interface AuditUserService {
 
-    AuditUserEventResponse saveAuditEvent(AuditUserEventRequest request);
+    AuditUserEventResponse saveAuditUserEvent(AuditUserEventRequest request);
 }

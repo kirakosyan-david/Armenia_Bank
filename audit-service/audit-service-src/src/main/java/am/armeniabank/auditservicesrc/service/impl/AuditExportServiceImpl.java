@@ -1,7 +1,7 @@
 package am.armeniabank.auditservicesrc.service.impl;
 
 import am.armeniabank.auditservicesrc.entity.AuditUser;
-import am.armeniabank.auditservicesrc.repository.AuditEventRepository;
+import am.armeniabank.auditservicesrc.repository.AuditUserEventRepository;
 import am.armeniabank.auditservicesrc.service.AuditExportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuditExportServiceImpl implements AuditExportService {
 
-    private final AuditEventRepository auditRepository;
+    private final AuditUserEventRepository auditRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${archive.audit}")
