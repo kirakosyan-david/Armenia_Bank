@@ -58,10 +58,12 @@ public class AuditServiceClient {
             if (response.getStatusCode().is2xxSuccessful()) {
                 log.info("Audit wallet event sent successfully: {}", message);
             } else {
-                log.warn("Audit wallet event sent but received status: {}", response.getStatusCode());
+                log.warn("Audit wallet event for walletId={} userId={} sent but received status: {}",
+                        walletId, user.getId(), response.getStatusCode());
             }
         } catch (RestClientException e) {
-            log.error("Error sending audit wallet event: {}", e.getMessage(), e);
+            log.error("Error sending audit wallet event for walletId={} userId={}: {}",
+                    walletId, user.getId(), e.getMessage(), e);
         }
     }
 }
