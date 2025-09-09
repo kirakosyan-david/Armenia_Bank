@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,8 +36,8 @@ public interface WalletController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/{userId}")
-    ResponseEntity<WalletResponse> createWallet(@PathVariable("userId") UUID userId,
-                                                @RequestParam Currency currency);
+    ResponseEntity<WalletResponse> createWallet(@PathVariable("userId") @NotNull UUID userId,
+                                                @RequestParam @NotNull Currency currency);
 
     @Operation(summary = "Get wallet by ID",
             description = "Retrieves the wallet details for the specified wallet ID")
@@ -45,7 +46,7 @@ public interface WalletController {
             @ApiResponse(responseCode = "404", description = "Wallet not found")
     })
     @GetMapping("/{walletId}")
-    ResponseEntity<WalletResponse> getWalletById(@PathVariable("walletId") UUID walletId);
+    ResponseEntity<WalletResponse> getWalletById(@PathVariable("walletId") @NotNull UUID walletId);
 
     @Operation(summary = "Get wallets by User ID",
             description = "Retrieves all wallets for the specified user ID")
@@ -53,21 +54,21 @@ public interface WalletController {
             @ApiResponse(responseCode = "200", description = "Wallets retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @GetMapping("/{userId}/users")
-    ResponseEntity<List<WalletResponse>> getWalletsByUserId(@PathVariable("userId") UUID userId);
+    @GetMapping("/{userId}/wallets")
+    ResponseEntity<List<WalletResponse>> getWalletsByUserId(@PathVariable("userId") @NotNull UUID userId);
 
     @Operation(summary = "Block wallet",
             description = "Blocks the specified wallet, preventing further operations")
     @PutMapping("/{walletId}/block")
-    ResponseEntity<WalletResponse> blockWallet(@PathVariable("walletId") UUID walletId);
+    ResponseEntity<WalletResponse> blockWallet(@PathVariable("walletId") @NotNull UUID walletId);
 
     @Operation(summary = "Unblock wallet",
             description = "Unblocks the specified wallet, allowing operations again")
     @PutMapping("/{walletId}/unblock")
-    ResponseEntity<WalletResponse> unblockWallet(@PathVariable("walletId") UUID walletId);
+    ResponseEntity<WalletResponse> unblockWallet(@PathVariable("walletId") @NotNull UUID walletId);
 
     @Operation(summary = "Close wallet",
             description = "Closes the specified wallet permanently")
     @PutMapping("/{walletId}/close")
-    ResponseEntity<WalletResponse> closeWallet(@PathVariable("walletId") UUID walletId);
+    ResponseEntity<WalletResponse> closeWallet(@PathVariable("walletId") @NotNull UUID walletId);
 }

@@ -6,20 +6,25 @@ import am.armeniabank.walletserviceapi.enums.WalletStatus;
 import am.armeniabank.walletserviceapi.response.UserResponse;
 import am.armeniabank.walletserviceapi.response.WalletResponse;
 import am.armeniabank.walletservicesrc.entity.Wallet;
+import am.armeniabank.walletservicesrc.exception.custom.WalletAlreadyExistsException;
+import am.armeniabank.walletservicesrc.exception.custom.WalletNotFoundException;
 import am.armeniabank.walletservicesrc.integration.AuditServiceClient;
-import am.armeniabank.walletservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.walletservicesrc.mapper.WalletMapper;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
 import am.armeniabank.walletservicesrc.security.SecurityUtils;
 import am.armeniabank.walletservicesrc.service.WalletService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
@@ -30,11 +35,15 @@ public class WalletServiceImpl implements WalletService {
     private final AuditServiceClient auditClient;
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public WalletResponse createWallet(UUID userId, Currency currency) {
+        log.info("Creating wallet for userId={} with currency={}", userId, currency);
 
-        if (walletRepository.findByUserIdAndCurrency(userId, currency).isPresent()) {
-            throw new RuntimeException("Wallet already exists for user: " + userId + " with currency: " + currency);
-        }
+        walletRepository.findByUserIdAndCurrency(userId, currency)
+                .ifPresent(w -> {
+                    log.warn("Wallet already exists for userId={} with currency={}", userId, currency);
+                    throw new WalletAlreadyExistsException(userId, currency.name());
+                });
 
         String token = SecurityUtils.getCurrentToken();
 
@@ -53,37 +62,55 @@ public class WalletServiceImpl implements WalletService {
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-CREATED");
 
+        log.info("Wallet created successfully with id={} for userId={}", walletSaved.getId(), userId);
         return walletMapper.toWalletResponse(walletSaved, userById);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public WalletResponse getWalletById(UUID walletId) {
+        log.debug("Fetching wallet by id={}", walletId);
+
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+                .orElseThrow(() -> {
+                    log.error("Wallet not found with id={}", walletId);
+                    return new WalletNotFoundException(walletId);
+                });
 
         String token = SecurityUtils.getCurrentToken();
 
         UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
 
+        log.info("Fetched wallet with id={} for userId={}", walletId, wallet.getUserId());
         return walletMapper.toWalletResponse(wallet, userById);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<WalletResponse> getWalletsByUserId(UUID userId) {
+        log.debug("Fetching wallets for userId={}", userId);
+
         List<Wallet> wallets = walletRepository.findAllByUserId(userId);
         String token = SecurityUtils.getCurrentToken();
 
         UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
 
+        log.info("Fetched {} wallets for userId={}", wallets.size(), userId);
         return wallets.stream()
                 .map(wallet -> walletMapper.toWalletResponse(wallet, userById))
                 .toList();
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public WalletResponse blockWallet(UUID walletId) {
+        log.info("Blocking wallet with id={}", walletId);
+
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+                .orElseThrow(() -> {
+                    log.error("Wallet not found for blocking, id={}", walletId);
+                    return new WalletNotFoundException(walletId);
+                });
         wallet.setStatus(WalletStatus.BLOCKED);
         walletRepository.save(wallet);
         String token = SecurityUtils.getCurrentToken();
@@ -91,13 +118,21 @@ public class WalletServiceImpl implements WalletService {
         UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-BLOCKED");
+
+        log.info("Wallet with id={} has been blocked", walletId);
         return walletMapper.toWalletResponse(wallet, userById);
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public WalletResponse unblockWallet(UUID walletId) {
+        log.info("Unblocking wallet with id={}", walletId);
+
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+                .orElseThrow(() -> {
+                    log.error("Wallet not found for unblocking, id={}", walletId);
+                    return new WalletNotFoundException(walletId);
+                });
         wallet.setStatus(WalletStatus.ACTIVE);
         walletRepository.save(wallet);
         String token = SecurityUtils.getCurrentToken();
@@ -106,13 +141,20 @@ public class WalletServiceImpl implements WalletService {
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-UNBLOCKED");
 
+        log.info("Wallet with id={} has been unblocked", walletId);
         return walletMapper.toWalletResponse(wallet, userById);
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public WalletResponse closeWallet(UUID walletId) {
+        log.info("Closing wallet with id={}", walletId);
+
         Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found: " + walletId));
+                .orElseThrow(() -> {
+                    log.error("Wallet not found for closing, id={}", walletId);
+                    return new WalletNotFoundException(walletId);
+                });
         wallet.setStatus(WalletStatus.CLOSED);
         walletRepository.save(wallet);
         String token = SecurityUtils.getCurrentToken();
@@ -121,6 +163,7 @@ public class WalletServiceImpl implements WalletService {
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-CLOSED");
 
+        log.info("Wallet with id={} has been closed", walletId);
         return walletMapper.toWalletResponse(wallet, userById);
     }
 

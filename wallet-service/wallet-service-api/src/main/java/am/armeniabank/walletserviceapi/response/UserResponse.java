@@ -1,5 +1,6 @@
 package am.armeniabank.walletserviceapi.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,13 @@ import java.util.UUID;
 @Builder
 public class UserResponse {
 
+    @JsonProperty("id")
     private UUID id;
+
+    @JsonProperty("firstName")
     private String firstName;
+
+    @JsonProperty("lastName")
     private String lastName;
+
 }

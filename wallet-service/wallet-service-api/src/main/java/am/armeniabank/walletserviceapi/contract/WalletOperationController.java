@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +36,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{walletId}/credit")
-    ResponseEntity<WalletOperationResponse> credit(@PathVariable("walletId") UUID walletId,
+    ResponseEntity<WalletOperationResponse> credit(@PathVariable("walletId") @NotNull UUID walletId,
                                                    @Valid @RequestBody WalletOperationRequest reason);
 
     @Operation(summary = "Debit wallet balance",
@@ -49,7 +50,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{walletId}/debit")
-    ResponseEntity<WalletOperationResponse> debit(@PathVariable("walletId") UUID walletId,
+    ResponseEntity<WalletOperationResponse> debit(@PathVariable("walletId") @NotNull UUID walletId,
                                                   @Valid @RequestBody WalletOperationRequest reason);
 
     @Operation(summary = "Freeze wallet balance",
@@ -63,7 +64,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{walletId}/freeze")
-    ResponseEntity<WalletOperationResponse> freeze(@PathVariable("walletId") UUID walletId,
+    ResponseEntity<WalletOperationResponse> freeze(@PathVariable("walletId") @NotNull UUID walletId,
                                                    @Valid @RequestBody WalletOperationRequest reason);
 
     @Operation(summary = "Unfreeze wallet balance",
@@ -77,7 +78,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{walletId}/unfreeze")
-    ResponseEntity<WalletOperationResponse> unfreeze(@PathVariable("walletId") UUID walletId,
+    ResponseEntity<WalletOperationResponse> unfreeze(@PathVariable("walletId") @NotNull UUID walletId,
                                                      @Valid @RequestBody WalletOperationRequest reason);
 
     @Operation(summary = "Get wallet operations",
@@ -91,5 +92,5 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{walletId}/operations")
-    ResponseEntity<List<WalletOperationResponse>> getOperations(@PathVariable("walletId") UUID walletId);
+    ResponseEntity<List<WalletOperationResponse>> getOperations(@PathVariable("walletId") @NotNull UUID walletId);
 }

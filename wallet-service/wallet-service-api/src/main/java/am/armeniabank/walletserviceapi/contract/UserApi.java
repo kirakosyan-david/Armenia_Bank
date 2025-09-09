@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Validated
 @Tag(name = "User API", description = "API for retrieving user information")
-@FeignClient(name = "user-service", url = "${auth-service.url}")
+@FeignClient(name = "auth-service", url = "${auth-service.url}")
 public interface UserApi {
 
     @Operation(
@@ -31,7 +31,7 @@ public interface UserApi {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping(ApiConstants.USER_SERVICE_URL + "/{id}")
-    UserResponse getUserById(@PathVariable UUID id,
+    @GetMapping(ApiConstants.AUTH_SERVICE_URL + "/{id}")
+    UserResponse getUserById(@PathVariable("id") UUID id,
                              @RequestHeader("Authorization") String token);
 }

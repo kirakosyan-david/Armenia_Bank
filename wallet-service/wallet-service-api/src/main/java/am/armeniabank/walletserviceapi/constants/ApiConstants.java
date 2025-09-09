@@ -4,7 +4,7 @@ public class ApiConstants {
 
     public static final String WALLET_SERVICE_URL = "/api/wallets";
     public static final String WALLET_SERVICE_OPERATION_URL = "/api/wallets/operation";
-    public static final String USER_SERVICE_URL = "/api/users";
+    public static final String AUTH_SERVICE_URL = "/api/users";
 
     private ApiConstants() {
     }
