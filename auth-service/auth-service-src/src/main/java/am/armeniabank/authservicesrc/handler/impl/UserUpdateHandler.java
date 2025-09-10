@@ -39,7 +39,11 @@ public class UserUpdateHandler implements UserEventHandler {
 
         log.info("User Update event received for email: {}", event.getEmail());
 
-        processUserEvent(event, userRepository, mailService, log);
+        try {
+            processUserEvent(event, userRepository, mailService, log);
+        } catch (Exception e) {
+            log.error("Failed to process user updated event for email {}: {}", event.getEmail(), e.getMessage(), e);
+        }
     }
 
 }

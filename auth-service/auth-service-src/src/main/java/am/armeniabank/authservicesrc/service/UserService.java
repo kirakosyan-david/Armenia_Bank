@@ -5,6 +5,7 @@ import am.armeniabank.authserviceapi.response.UpdateUserResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
 import am.armeniabank.authserviceapi.response.UserResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -18,5 +19,7 @@ public interface UserService {
     void updateLastLogin(UUID userId);
 
     void deleteUser(UUID userId);
+
+    List<UserResponse> getUsersPaginated(int page, int size);
 
 }

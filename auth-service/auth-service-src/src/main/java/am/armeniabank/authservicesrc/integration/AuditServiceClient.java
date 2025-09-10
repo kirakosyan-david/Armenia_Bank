@@ -1,5 +1,6 @@
 package am.armeniabank.authservicesrc.integration;
 
+import am.armeniabank.authservicesrc.exception.custom.UserServerError;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class AuditServiceClient {
 
         } catch (RestClientException e) {
             log.error("Error sending audit event: {}", e.getMessage(), e);
+            throw new UserServerError("Failed to send audit event", e);
         }
     }
 }

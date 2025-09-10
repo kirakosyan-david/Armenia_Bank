@@ -2,10 +2,13 @@ package am.armeniabank.authservicesrc.service.impl;
 
 import am.armeniabank.authserviceapi.request.LoginRequest;
 import am.armeniabank.authserviceapi.request.RefreshTokenRequest;
-import am.armeniabank.authservicesrc.integration.AuditServiceClient;
-import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.TokenResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
+import am.armeniabank.authservicesrc.exception.custom.LoginFailedException;
+import am.armeniabank.authservicesrc.exception.custom.LogoutFailedException;
+import am.armeniabank.authservicesrc.exception.custom.TokenRefreshException;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authservicesrc.service.AuthService;
 import am.armeniabank.authservicesrc.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +59,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public TokenResponse login(LoginRequest login) {
+        log.info("Attempting login for user with email={}", login.getEmail());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -76,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
             );
 
             String responseBody = response.getBody();
-            log.info("Token response JSON: {}", responseBody);
+            log.debug("Keycloak token response raw JSON: {}", responseBody);
 
             TokenResponse tokenResponse = objectMapper.readValue(responseBody, TokenResponse.class);
 
@@ -91,19 +96,22 @@ public class AuthServiceImpl implements AuthService {
             );
             auditClient.sendAuditEvent(auditEvent);
 
+            log.info("User successfully logged in with email={}", login.getEmail());
             return tokenResponse;
 
         } catch (HttpClientErrorException.Unauthorized ex) {
-            log.error("Unauthorized: {}", ex.getResponseBodyAsString());
-            throw new RuntimeException("Unauthorized: " + ex.getResponseBodyAsString());
+            log.warn("Unauthorized login attempt for email={}. Error: {}", login.getEmail(), ex.getResponseBodyAsString());
+            throw new LoginFailedException("Invalid username or password", ex);
         } catch (Exception ex) {
-            log.error("Login error: {}", ex.getMessage());
-            throw new RuntimeException("Login error: " + ex.getMessage(), ex);
+            log.error("Login error for email={}: {}", login.getEmail(), ex.getMessage(), ex);
+            throw new LoginFailedException("Login failed due to unexpected error", ex);
         }
     }
 
     @Override
     public void logout(RefreshTokenRequest refreshToken) {
+        log.info("Attempting logout with refreshToken={}", refreshToken.getRefreshToken());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -128,13 +136,14 @@ public class AuthServiceImpl implements AuthService {
             );
             log.info("User successfully logged out");
         } catch (HttpClientErrorException ex) {
-            log.error("Logout failed: {}", ex.getResponseBodyAsString());
-            throw new RuntimeException("Logout failed: " + ex.getResponseBodyAsString());
+            log.error("Logout failed for refreshToken={}", refreshToken.getRefreshToken(), ex);
+            throw new LogoutFailedException("Logout failed: " + ex.getResponseBodyAsString(), ex);
         }
     }
 
     @Override
     public String refreshAccessToken(RefreshTokenRequest refreshToken) {
+        log.info("Attempting to refresh access token with refreshToken={}", refreshToken.getRefreshToken());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -159,10 +168,11 @@ public class AuthServiceImpl implements AuthService {
                     request,
                     TokenResponse.class
             );
+            log.info("Access token refreshed successfully");
             return response.getBody().getAccessToken();
         } catch (HttpClientErrorException ex) {
-            log.error("Token refresh failed: {}", ex.getResponseBodyAsString());
-            throw new RuntimeException("Token refresh failed: " + ex.getResponseBodyAsString());
+            log.error("Token refresh failed for refreshToken={}", refreshToken.getRefreshToken(), ex);
+            throw new TokenRefreshException("Could not refresh token", ex);
         }
     }
 }
