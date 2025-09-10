@@ -1,5 +1,6 @@
 package am.armeniabank.authservicesrc.util;
 
+import am.armeniabank.authservicesrc.exception.custom.InvalidDocumentException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,21 +13,24 @@ import java.io.IOException;
 public class ImageUtil {
 
     public static String uploadDocument(MultipartFile multipartFile, String path) {
-        String fileName;
-        try {
-            if (multipartFile != null && !multipartFile.isEmpty()) {
-                fileName = System.nanoTime() + "_" + multipartFile.getOriginalFilename();
-                File file = new File(path + fileName);
-                if (documentFilterChain(file)) {
-                    multipartFile.transferTo(file);
-                    return fileName;
-                }
-                throw new IOException("Wrong file format");
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            throw new InvalidDocumentException("File is empty");
         }
-        return null;
+
+        String fileName = System.nanoTime() + "_" + multipartFile.getOriginalFilename();
+        File file = new File(path + fileName);
+
+        if (!documentFilterChain(file)) {
+            throw new InvalidDocumentException("Unsupported file format: " + file.getName());
+        }
+
+        try {
+            multipartFile.transferTo(file);
+            return fileName;
+        } catch (IOException e) {
+            log.error("Failed to save file: {}", e.getMessage(), e);
+            throw new InvalidDocumentException("Failed to save file: " + file.getName(), e);
+        }
     }
 
     private static boolean documentFilterChain(File file) {

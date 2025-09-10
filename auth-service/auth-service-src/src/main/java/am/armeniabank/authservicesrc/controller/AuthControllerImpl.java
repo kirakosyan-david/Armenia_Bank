@@ -44,6 +44,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<TokenResponse> login(LoginRequest login) {
         try {
             TokenResponse token = authService.login(login);
+            log.info("User logged in successfully with email: {}", login.getEmail());
             return ResponseEntity.ok(token);
         } catch (UserLoginException e) {
             log.error("Login failed for user {}: {}", login.getEmail(), e.getMessage());
@@ -54,12 +55,14 @@ public class AuthControllerImpl implements AuthController {
     @Override
     public ResponseEntity<Void> logout(RefreshTokenRequest refreshToken) {
         authService.logout(refreshToken);
+        log.info("User logged out successfully");
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<String> refreshToken(RefreshTokenRequest refreshToken) {
         String newAccessToken = authService.refreshAccessToken(refreshToken);
+        log.info("Access token refreshed successfully");
         return ResponseEntity.ok(newAccessToken);
     }
 

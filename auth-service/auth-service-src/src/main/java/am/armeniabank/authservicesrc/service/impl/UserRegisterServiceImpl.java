@@ -7,6 +7,7 @@ import am.armeniabank.authserviceapi.response.UserDto;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;
+import am.armeniabank.authservicesrc.exception.custom.UserProfileException;
 import am.armeniabank.authservicesrc.handler.UserEventHandler;
 import am.armeniabank.authservicesrc.integration.AuditServiceClient;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
@@ -32,17 +33,11 @@ import java.time.LocalDateTime;
 public class UserRegisterServiceImpl implements UserRegisterService {
 
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
-
     private final PasswordEncoder passwordEncoder;
-
     private final AuditServiceClient auditClient;
-
     private final KeycloakService keycloakService;
-
     private final MailService mailService;
-
     private final UserEventHandler userEventHandler;
 
     @Autowired
@@ -68,67 +63,92 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         log.info("Registering user: {}", register.getEmail());
 
         if (userRepository.existsByEmail(register.getEmail())) {
+            log.warn("Email {} already exists in database", register.getEmail());
             throw new EmailAlreadyExistsException("Email already exists in database");
         }
 
         if (keycloakService.emailExistsInKeycloak(register.getEmail())) {
+            log.warn("Email {} already exists in Keycloak", register.getEmail());
             throw new EmailAlreadyExistsException("Email already exists in Keycloak");
         }
 
-        User user = User.builder()
-                .email(register.getEmail())
-                .password(passwordEncoder.encode(register.getPassword()))
-                .role(UserRole.USER)
-                .emailVerified(false)
-                .build();
+        try {
+            User user = User.builder()
+                    .email(register.getEmail())
+                    .password(passwordEncoder.encode(register.getPassword()))
+                    .role(UserRole.USER)
+                    .emailVerified(false)
+                    .build();
 
-        UserProfile profile = UserProfile.builder()
-                .firstName(register.getFirstName())
-                .lastName(register.getLastName())
-                .patronymic(register.getPatronymic())
-                .gender(Gender.OTHER)
-                .user(user)
-                .build();
+            UserProfile profile = UserProfile.builder()
+                    .firstName(register.getFirstName())
+                    .lastName(register.getLastName())
+                    .patronymic(register.getPatronymic())
+                    .gender(Gender.OTHER)
+                    .user(user)
+                    .build();
 
-        user.setProfile(profile);
+            user.setProfile(profile);
 
-        mailService.sendVerificationEmail(user, register.getPassportNumber());
+            mailService.sendVerificationEmail(user, register.getPassportNumber());
+            log.info("Verification email sent for user: {}", register.getEmail());
 
-        User userSaved = userRepository.save(user);
+            User userSaved = userRepository.save(user);
+            log.info("User saved in DB with id={}", userSaved.getId());
 
-        keycloakService.createUserInKeycloak(register, user.getRole());
+            keycloakService.createUserInKeycloak(register, user.getRole());
+            log.info("User created in Keycloak for email={}", register.getEmail());
 
-        auditEvetConsumer(register);
+            auditEvetConsumer(register);
 
-        userEventProducer(userSaved);
+            userEventProducer(userSaved);
 
-        return userMapper.toDto(user, profile, user.getVerification());
+            return userMapper.toDto(user, profile, user.getVerification());
+
+        } catch (Exception e) {
+            log.error("Error registering user {}: {}", register.getEmail(), e.getMessage(), e);
+            throw new UserProfileException("Failed to register user " + register.getEmail(), e);
+        }
+
     }
 
     private void auditEvetConsumer(UserRegistrationRequest register) {
-        AuditEvent auditEvent = new AuditEvent(
-                "auth-service",
-                "USER_REGISTERED",
-                "User Register with username: " + register.getEmail(),
-                LocalDateTime.now()
-        );
+        try {
+            AuditEvent auditEvent = new AuditEvent(
+                    "auth-service",
+                    "USER_REGISTERED",
+                    "User Register with username: " + register.getEmail(),
+                    LocalDateTime.now()
+            );
 
-        auditClient.sendAuditEvent(auditEvent);
+            auditClient.sendAuditEvent(auditEvent);
+            log.info("Audit event sent for email={}", register.getEmail());
+
+        } catch (Exception e) {
+            log.error("Failed to send audit event for email={}: {}", register.getEmail(), e.getMessage(), e);
+        }
+
     }
 
     private void userEventProducer(User userSaved) {
-        UserEvent userEvent = UserEvent.builder()
-                .id(userSaved.getId())
-                .firstName(userSaved.getProfile().getFirstName())
-                .lastName(userSaved.getProfile().getLastName())
-                .patronymic(userSaved.getProfile().getPatronymic())
-                .email(userSaved.getEmail())
-                .emailVerified(userSaved.isEmailVerified())
-                .role(userSaved.getRole().name())
-                .type(UserEventType.CREATED)
-                .createdAt(LocalDateTime.now())
-                .build();
-        userEventHandler.handle(userEvent);
+        try {
+            UserEvent userEvent = UserEvent.builder()
+                    .id(userSaved.getId())
+                    .firstName(userSaved.getProfile().getFirstName())
+                    .lastName(userSaved.getProfile().getLastName())
+                    .patronymic(userSaved.getProfile().getPatronymic())
+                    .email(userSaved.getEmail())
+                    .emailVerified(userSaved.isEmailVerified())
+                    .role(userSaved.getRole().name())
+                    .type(UserEventType.CREATED)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            userEventHandler.handle(userEvent);
+            log.info("User event sent for userId={}", userSaved.getId());
+        } catch (Exception e) {
+            log.error("Failed to send user event for userId={}: {}", userSaved.getId(), e.getMessage(), e);
+        }
+
     }
 
 }

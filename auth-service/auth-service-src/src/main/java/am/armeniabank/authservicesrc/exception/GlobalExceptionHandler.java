@@ -4,8 +4,26 @@ import am.armeniabank.authserviceapi.response.RestErrorResponse;
 import am.armeniabank.authservicesrc.exception.custom.ChangePasswordException;
 import am.armeniabank.authservicesrc.exception.custom.DeleteNotFoundException;
 import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;
+import am.armeniabank.authservicesrc.exception.custom.EmailVerificationException;
+import am.armeniabank.authservicesrc.exception.custom.InvalidDocumentException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakAccessTokenException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakDeleteException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakRoleNotFoundException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakUpdateException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakUserCreationException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakUserNotFoundException;
+import am.armeniabank.authservicesrc.exception.custom.LoginFailedException;
+import am.armeniabank.authservicesrc.exception.custom.LogoutFailedException;
 import am.armeniabank.authservicesrc.exception.custom.SendMessageException;
+import am.armeniabank.authservicesrc.exception.custom.TokenRefreshException;
+import am.armeniabank.authservicesrc.exception.custom.UserLoginException;
+import am.armeniabank.authservicesrc.exception.custom.UserNotAuthenticatedException;
+import am.armeniabank.authservicesrc.exception.custom.UserNotFoundException;
+import am.armeniabank.authservicesrc.exception.custom.UserProfileException;
+import am.armeniabank.authservicesrc.exception.custom.UserProfileNotFoundException;
 import am.armeniabank.authservicesrc.exception.custom.UserServerError;
+import am.armeniabank.authservicesrc.exception.custom.UserVerificationException;
 import am.armeniabank.authservicesrc.exception.custom.WrongUserIdException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -36,11 +54,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
-    @ExceptionHandler(value = {
+    @ExceptionHandler({
             DeleteNotFoundException.class,
-            HttpClientErrorException.class,
+            UserNotFoundException.class,
+            UserProfileNotFoundException.class,
+            KeycloakUserNotFoundException.class,
+            KeycloakRoleNotFoundException.class,
+            HttpClientErrorException.class
     })
-    public ResponseEntity<Object> handleEntityNotFoundException(Exception ex, WebRequest request) {
+    public ResponseEntity<Object> handleNotFoundExceptions(Exception ex, WebRequest request) {
+        log.warn("Resource not found: {}", ex.getMessage());
         RestErrorResponse errorDto = RestErrorResponse.builder()
                 .statusCode(HttpStatus.NOT_FOUND.value())
                 .errorMessage(ex.getMessage())
@@ -48,20 +71,74 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(UserServerError.class)
-    public ResponseEntity<String> handleException(Exception ex) {
-        ex.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+    @ExceptionHandler({
+            LoginFailedException.class,
+            TokenRefreshException.class,
+            UserLoginException.class,
+            KeycloakAccessTokenException.class,
+            UserNotAuthenticatedException.class
+    })
+    public ResponseEntity<Object> handleUnauthorizedExceptions(RuntimeException ex, WebRequest request) {
+        log.warn("Unauthorized access: {}", ex.getMessage());
+        RestErrorResponse errorDto = RestErrorResponse.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .errorMessage(ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler({
+            UserServerError.class,
+            UserProfileException.class,
+            KeycloakException.class,
+            KeycloakDeleteException.class,
+            KeycloakUpdateException.class,
+            KeycloakUserCreationException.class,
+            EmailVerificationException.class,
+            UserVerificationException.class
+    })
+    public ResponseEntity<Object> handleInternalServerError(RuntimeException ex, WebRequest request) {
+        log.error("Internal server error: {}", ex.getMessage(), ex);
+        RestErrorResponse errorDto = RestErrorResponse.builder()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .errorMessage(ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
+    @ExceptionHandler({
+            WrongUserIdException.class,
+            SendMessageException.class,
+            ChangePasswordException.class,
+            LogoutFailedException.class,
+            InvalidDocumentException.class
+    })
+    public ResponseEntity<Object> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
+        log.warn("Bad request: {}", ex.getMessage(), ex);
+        RestErrorResponse errorDto = RestErrorResponse.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .errorMessage(ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleAllUnhandledExceptions(Exception ex, WebRequest request) {
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        RestErrorResponse errorDto = RestErrorResponse.builder()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .errorMessage("Unexpected error: " + ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     @Override
-    @ExceptionHandler(value = {
-            WrongUserIdException.class,
-            SendMessageException.class,
-            ChangePasswordException.class
-    })
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
         Map<String, String> errors = new HashMap<>();
         List<ObjectError> allErrors = ex.getBindingResult().getAllErrors();
         for (ObjectError error : allErrors) {
@@ -69,6 +146,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         }
-        return handleExceptionInternal(ex, errors, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        log.warn("Validation failed: {}", errors);
+        return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
     }
 }

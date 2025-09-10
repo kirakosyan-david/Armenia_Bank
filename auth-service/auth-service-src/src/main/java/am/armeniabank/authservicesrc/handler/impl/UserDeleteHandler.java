@@ -39,6 +39,10 @@ public class UserDeleteHandler implements UserEventHandler {
 
         log.info("User Delete event received for email: {}", event.getEmail());
 
-        processUserEvent(event, userRepository, mailService, log);
+        try {
+            processUserEvent(event, userRepository, mailService, log);
+        } catch (Exception e) {
+            log.error("Failed to process user deleted event for email {}: {}", event.getEmail(), e.getMessage(), e);
+        }
     }
 }

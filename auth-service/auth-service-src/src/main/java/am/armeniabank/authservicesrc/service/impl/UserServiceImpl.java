@@ -2,21 +2,21 @@ package am.armeniabank.authservicesrc.service.impl;
 
 import am.armeniabank.authserviceapi.emuns.UserRole;
 import am.armeniabank.authserviceapi.request.UserUpdateRequest;
-import am.armeniabank.authservicesrc.integration.AuditServiceClient;
-import am.armeniabank.authservicesrc.handler.UserEventHandler;
-import am.armeniabank.authservicesrc.kafka.model.enumeration.UserEventType;
-import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authserviceapi.response.UpdateUserResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
 import am.armeniabank.authserviceapi.response.UserResponse;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.entity.UserVerification;
+import am.armeniabank.authservicesrc.exception.custom.UserProfileException;
+import am.armeniabank.authservicesrc.handler.UserEventHandler;
+import am.armeniabank.authservicesrc.integration.AuditServiceClient;
+import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import am.armeniabank.authservicesrc.kafka.model.UserEvent;
+import am.armeniabank.authservicesrc.kafka.model.enumeration.UserEventType;
 import am.armeniabank.authservicesrc.mapper.UserMapper;
 import am.armeniabank.authservicesrc.repository.UserRepository;
 import am.armeniabank.authservicesrc.service.KeycloakService;
-import am.armeniabank.authservicesrc.service.MailService;
 import am.armeniabank.authservicesrc.service.UserService;
 import am.armeniabank.authservicesrc.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,8 +37,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,7 +51,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final KeycloakService keycloakService;
     private final AuditServiceClient auditClient;
-    private final MailService mailService;
     private final CacheManager cacheManager;
     private final UserEventHandler userUpdateHandler;
     private final UserEventHandler userDeleteHandler;
@@ -57,7 +61,6 @@ public class UserServiceImpl implements UserService {
                            PasswordEncoder passwordEncoder,
                            KeycloakService keycloakService,
                            AuditServiceClient auditClient,
-                           MailService mailService,
                            CacheManager cacheManager,
                            @Qualifier("userUpdateHandler") UserEventHandler userUpdateHandler,
                            @Qualifier("userDeleteHandler") UserEventHandler userDeleteHandler) {
@@ -66,36 +69,45 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.keycloakService = keycloakService;
         this.auditClient = auditClient;
-        this.mailService = mailService;
         this.cacheManager = cacheManager;
         this.userUpdateHandler = userUpdateHandler;
         this.userDeleteHandler = userDeleteHandler;
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "userByEmail", key = "#email")
     public UserEmailSearchResponse searchByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new UsernameNotFoundException("User with email " + email + " not found")
-        );
-        UserProfile profile = user.getProfile();
-        UserVerification verification = user.getVerification();
-        return userMapper.toSearchDto(user, profile, verification);
+        log.info("Searching user by email={}", email);
+        try {
+            User user = userRepository.findByEmail(email).orElseThrow(() ->
+                    new UsernameNotFoundException("User with email " + email + " not found")
+            );
+            UserProfile profile = user.getProfile();
+            UserVerification verification = user.getVerification();
+            return userMapper.toSearchDto(user, profile, verification);
+        } catch (Exception e) {
+            log.error("Error searching user by email {}: {}", email, e.getMessage(), e);
+            throw new UserProfileException("Failed to search user by email " + email, e);
+        }
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "userById", key = "#id")
     public UserResponse findById(UUID id) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
-        User user = findUserById(id);
-
-        UserProfile profile = user.getProfile();
-        UserVerification verification = user.getVerification();
-
-        if (currentUserId.equals(id)) {
-            return userMapper.toUserByIdDto(user, profile, verification);
+        log.info("Fetching user by id={}", id);
+        try {
+            UUID currentUserId = SecurityUtils.getCurrentUserId();
+            if (!currentUserId.equals(id)) {
+                throw new AccessDeniedException("You are not allowed to view this user's data");
+            }
+            User user = findUserById(id);
+            return userMapper.toUserByIdDto(user, user.getProfile(), user.getVerification());
+        } catch (Exception e) {
+            log.error("Error fetching user by id {}: {}", id, e.getMessage(), e);
+            throw new UserProfileException("Failed to fetch user by id " + id, e);
         }
-        throw new AccessDeniedException("You are not allowed to view this user’s data");
     }
 
     @Override
@@ -105,56 +117,89 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = "userById", key = "#id")
     })
     public UpdateUserResponse updateUser(UUID id, UserUpdateRequest request) {
+        log.info("Updating user id={}", id);
 
-        User userById = findUserById(id);
+        try {
+            User userById = findUserById(id);
+            String oldEmail = userById.getEmail();
+            if (!keycloakService.emailExistsInKeycloak(oldEmail)) {
+                log.warn("User with email {} not found in Keycloak", oldEmail);
+            }
 
-        String oldEmail = userById.getEmail();
+            userById.setEmail(request.getEmail());
+            userById.setPassword(passwordEncoder.encode(request.getPassword()));
+            userById.setRole(UserRole.valueOf(request.getRole().name().toUpperCase(Locale.ROOT)));
+            userById.setEmailVerified(false);
+            userById.setUpdatedAt(LocalDateTime.now());
 
-        boolean isEmail = keycloakService.emailExistsInKeycloak(oldEmail);
-        if (!isEmail) {
-            log.error("User with email {} not found in Keycloak", oldEmail);
+            User user = userRepository.save(userById);
+            keycloakService.updateUserInKeycloak(oldEmail, request, user.getRole());
+            auditEvetConsumer(request);
+            userEventUpdateProducer(user);
+
+            log.info("User id={} updated successfully", id);
+            return userMapper.toUserUpdateDto(user, user.getVerification());
+        } catch (Exception e) {
+            log.error("Error updating user id={}: {}", id, e.getMessage(), e);
+            throw new UserProfileException("Failed to update user with id=" + id, e);
         }
 
-        userById.setEmail(request.getEmail());
-        userById.setPassword(passwordEncoder.encode(request.getPassword()));
-        userById.setRole(UserRole.valueOf(request.getRole().name().toUpperCase(Locale.ROOT)));
-        userById.setEmailVerified(false);
-        userById.setUpdatedAt(LocalDateTime.now());
 
-        User user = userRepository.save(userById);
-
-        keycloakService.updateUserInKeycloak(oldEmail, request, user.getRole());
-
-        auditEvetConsumer(request);
-
-        userEventUpdateProducer(user);
-
-        return userMapper.toUserUpdateDto(user, user.getVerification());
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateLastLogin(UUID userId) {
-        User user = findUserById(userId);
-        user.setLastLoginAt(LocalDateTime.now());
-        userRepository.save(user);
+        log.info("Updating last login for userId={}", userId);
+
+        try {
+            User user = findUserById(userId);
+            user.setLastLoginAt(LocalDateTime.now());
+            userRepository.save(user);
+            log.info("Last login updated for userId={}", userId);
+        } catch (Exception e) {
+            log.error("Error updating last login for userId={}: {}", userId, e.getMessage(), e);
+            throw new UserProfileException("Failed to update last login for userId=" + userId, e);
+        }
+
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteUser(UUID userId) {
-        User user = findUserById(userId);
+        log.info("Deleting user id={}", userId);
+        try {
+            User user = findUserById(userId);
 
-        boolean keycloakDeleted = keycloakService.deleteUserFromKeycloak(user.getEmail());
-        if (!keycloakDeleted) {
-            log.warn("User not removed from Keycloak: {}", user.getEmail());
+            if (!keycloakService.deleteUserFromKeycloak(user.getEmail())) {
+                log.warn("User not removed from Keycloak: {}", user.getEmail());
+            }
+            userRepository.deleteById(user.getId());
+            log.info("User with email {} deleted from DB", user.getEmail());
+
+            evictCacheManual(user.getEmail(), user.getId());
+            userEventDeleteProducer(user);
+
+        } catch (Exception e) {
+            log.error("Error deleting user id={}: {}", userId, e.getMessage(), e);
+            throw new UserProfileException("Failed to delete user with id=" + userId, e);
         }
-        userRepository.deleteById(user.getId());
-        log.info("The user with email address {} has been removed from the database.", user.getEmail());
+    }
 
-        evictCacheManual(user.getEmail(), user.getId());
-
-        userEventDeleteProducer(user);
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getUsersPaginated(int page, int size) {
+        log.info("Fetching paginated users page={} size={}", page, size);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<User> usersPage = userRepository.findAll(pageable);
+            return usersPage.stream()
+                    .map(user -> userMapper.toUserByIdDto(user, user.getProfile(), user.getVerification()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching paginated users: {}", e.getMessage(), e);
+            throw new UserProfileException("Failed to fetch paginated users", e);
+        }
     }
 
     protected void evictCacheManual(String email, UUID id) {
