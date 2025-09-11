@@ -22,6 +22,15 @@ spring:
     hibernate:
       ddl-auto: update
 
+  cache:
+    type: redis
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: wallet_service
+      timeout: 60000
+
   liquibase:
     change-log: classpath:/db/migration/changelog.xml
     default-schema: wallet_service
@@ -29,6 +38,8 @@ spring:
 
   kafka:
     bootstrap-servers: kafka:9092
+    admin:
+      auto-create: true
     consumer:
       group-id: my-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -39,7 +50,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topic:
-      user-events: user-events-topic
+      wallet-events: wallet-events-topic
       audit-events: audit-events-topic
 
 
