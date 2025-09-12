@@ -21,6 +21,8 @@ import am.armeniabank.walletservicesrc.security.SecurityUtils;
 import am.armeniabank.walletservicesrc.service.WalletOperationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "operations", key = "#walletId")
     public WalletOperationResponse credit(UUID walletId, WalletOperationRequest request) {
         log.info("Starting CREDIT operation for walletId={} with amount={}", walletId, request.getAmount());
 
@@ -63,6 +66,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "operations", key = "#walletId")
     public WalletOperationResponse debit(UUID walletId, WalletOperationRequest request) {
         log.info("Starting DEBIT operation for walletId={} with amount={}", walletId, request.getAmount());
 
@@ -81,6 +85,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "operations", key = "#walletId")
     public WalletOperationResponse freeze(UUID walletId, WalletOperationRequest request) {
         log.info("Starting FREEZE operation for walletId={} with amount={}", walletId, request.getAmount());
 
@@ -100,6 +105,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "operations", key = "#walletId")
     public WalletOperationResponse unfreeze(UUID walletId, WalletOperationRequest request) {
         log.info("Starting UNFREEZE operation for walletId={} with amount={}", walletId, request.getAmount());
 
@@ -120,6 +126,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "operations", key = "#walletId")
     public List<WalletOperationResponse> getOperations(UUID walletId) {
         log.debug("Fetching operations for walletId={}", walletId);
 

@@ -15,6 +15,8 @@ import am.armeniabank.walletservicesrc.security.SecurityUtils;
 import am.armeniabank.walletservicesrc.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +70,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "wallets", key = "#walletId")
     public WalletResponse getWalletById(UUID walletId) {
         log.debug("Fetching wallet by id={}", walletId);
 
@@ -103,6 +106,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "wallets", key = "#walletId")
     public WalletResponse blockWallet(UUID walletId) {
         log.info("Blocking wallet with id={}", walletId);
 
@@ -125,6 +129,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "wallets", key = "#walletId")
     public WalletResponse unblockWallet(UUID walletId) {
         log.info("Unblocking wallet with id={}", walletId);
 
@@ -147,6 +152,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CacheEvict(value = "wallets", key = "#walletId")
     public WalletResponse closeWallet(UUID walletId) {
         log.info("Closing wallet with id={}", walletId);
 

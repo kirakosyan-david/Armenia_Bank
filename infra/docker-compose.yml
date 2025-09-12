@@ -22,8 +22,8 @@ services:
       - "6379:6379"
     restart: always
     environment:
-      REDIS_PASSWORD: auth_service
-    command: [ "redis-server", "--requirepass", "auth_service" ]
+      REDIS_PASSWORD: armenia_bank
+    command: [ "redis-server", "--requirepass", "armenia_bank" ]
     networks:
       - my-network
 
@@ -119,6 +119,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: auth_service
       AUDIT_SERVICE_URL: http://audit-service:8082
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - ../log_armenia_bank:/logs
     networks:
       - my-network
 
@@ -143,6 +145,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    volumes:
+      - ../log_armenia_bank:/logs
     networks:
       - my-network
 
@@ -166,6 +170,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    volumes:
+      - ../log_armenia_bank:/logs
     networks:
       - my-network
 

@@ -28,7 +28,7 @@ spring:
     redis:
       host: redis
       port: 6379
-      password: wallet_service
+      password: armenia_bank
       timeout: 60000
 
   liquibase:
