@@ -3,7 +3,7 @@
     <property name="LOGS_BASE" value="/logs"/>
 
     <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS_BASE}/${SERVICE_NAME}/current/gateway-service.log</file>
+        <file>${LOGS_BASE}/${SERVICE_NAME}/current/gateway-service-logs.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOGS_BASE}/${SERVICE_NAME}/%d{yyyy-MM-dd}/%d{yyyy-MM-dd_HH}-00-59-gateway-service.log</fileNamePattern>
