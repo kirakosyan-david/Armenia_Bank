@@ -98,6 +98,8 @@ services:
       - auth-service
     ports:
       - "9090:9090"
+    volumes:
+      - ../log_armenia_bank:/logs
     networks:
       - my-network
 

@@ -83,7 +83,6 @@ quarkus:
   transaction-manager:
     enable-recovery: true
 
-debug: true
 logging:
   level:
     org.springframework.security: DEBUG

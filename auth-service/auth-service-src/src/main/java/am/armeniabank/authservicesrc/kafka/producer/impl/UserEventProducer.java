@@ -16,7 +16,7 @@ public class UserEventProducer implements EventProducer<UserEvent> {
 
     private final KafkaTemplate<String, UserEvent> kafkaTemplate;
 
-    @Value("${spring.kafka.topic.user-events}")
+    @Value("${spring.kafka.topic.auth-events}")
     private String topic;
 
     @Override

@@ -40,7 +40,7 @@ spring:
     redis:
       host: redis
       port: 6379
-      password: auth_service
+      password: armenia_bank
       timeout: 60000
 
   liquibase:
@@ -72,7 +72,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topic:
-      user-events: user-events-topic
+      auth-events: auth-events-topic
       audit-events: audit-events-topic
 
   servlet:

@@ -1,29 +1,27 @@
 <configuration>
     <property name="SERVICE_NAME" value="gateway-service"/>
-
-    <property name="LOGS_BASE" value="D:/Test_Task/Armenia_Bank/log_armenia_bank"/>
+    <property name="LOGS_BASE" value="/logs"/>
 
     <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-
-
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
-        </encoder>
+        <file>${LOGS_BASE}/${SERVICE_NAME}/current/gateway-service.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS_BASE}/${SERVICE_NAME}/%d{yyyy-MM-dd}/gateway-service-logger-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-
-            <timeBasedFileNamingAndTriggeringPolicy
-                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+            <fileNamePattern>${LOGS_BASE}/${SERVICE_NAME}/%d{yyyy-MM-dd}/%d{yyyy-MM-dd_HH}-00-59-gateway-service.log</fileNamePattern>
+            <maxHistory>720</maxHistory>
+            <totalSizeCap>50GB</totalSizeCap>
         </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+
+        <prudent>false</prudent>
     </appender>
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%d{ISO8601} %-5level [%thread] %logger{1} - %msg%n</Pattern>
-        </layout>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
     </appender>
 
     <root level="info">

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditUserEvent {
+public class AuditEvent {
 
     private String service;
     private String eventType;
