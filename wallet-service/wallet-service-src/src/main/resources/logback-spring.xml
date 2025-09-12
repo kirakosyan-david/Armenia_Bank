@@ -3,10 +3,10 @@
     <property name="LOGS_BASE" value="/logs"/>
 
     <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS_BASE}/${SERVICE_NAME}/current/wallet-service-logs.log</file>
+        <file>${LOGS_BASE}/${SERVICE_NAME}/current/${SERVICE_NAME}.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS_BASE}/${SERVICE_NAME}/%d{yyyy-MM-dd}/%d{yyyy-MM-dd_HH}-00-59-wallet-service.log</fileNamePattern>
+            <fileNamePattern>${LOGS_BASE}/${SERVICE_NAME}/%d{yyyy-MM-dd}/%d{HH}-${SERVICE_NAME}.log</fileNamePattern>
             <maxHistory>720</maxHistory>
             <totalSizeCap>50GB</totalSizeCap>
         </rollingPolicy>
@@ -28,4 +28,7 @@
         <appender-ref ref="RollingFile"/>
         <appender-ref ref="Console"/>
     </root>
+
+    <logger name="org.springframework.boot.autoconfigure" level="WARN"/>
+    <logger name="org.springframework.cloud" level="WARN"/>
 </configuration>
