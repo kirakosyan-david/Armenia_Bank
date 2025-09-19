@@ -1,10 +1,12 @@
 CREATE USER auth_service WITH PASSWORD 'auth_service';
 CREATE USER audit_service WITH PASSWORD 'audit_service';
 CREATE USER wallet_service WITH PASSWORD 'wallet_service';
+CREATE USER transaction_service WITH PASSWORD 'transaction_service';
 
 CREATE DATABASE auth_service OWNER auth_service;
 CREATE DATABASE audit_service OWNER audit_service;
 CREATE DATABASE wallet_service OWNER wallet_service;
+CREATE DATABASE transaction_service OWNER transaction_service;
 
 \c auth_service
 CREATE SCHEMA IF NOT EXISTS auth_service;
@@ -20,3 +22,8 @@ ALTER DATABASE audit_service SET search_path TO audit_service, public;
 CREATE SCHEMA IF NOT EXISTS wallet_service;
 GRANT ALL ON SCHEMA wallet_service TO wallet_service;
 ALTER DATABASE wallet_service SET search_path TO wallet_service, public;
+
+\c transaction_service
+CREATE SCHEMA IF NOT EXISTS transaction_service;
+GRANT ALL ON SCHEMA transaction_service TO transaction_service;
+ALTER DATABASE transaction_service SET search_path TO transaction_service, public;

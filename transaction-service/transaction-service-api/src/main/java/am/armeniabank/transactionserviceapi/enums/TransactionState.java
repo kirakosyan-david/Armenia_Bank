@@ -1,9 +1,10 @@
 package am.armeniabank.transactionserviceapi.enums;
 
-public enum TransactionStatus {
+public enum TransactionState {
 
-    PENDING,
+    CREATED,
+    APPROVED,
     COMPLETED,
     FAILED,
-    REVERSED
+    ROLLED_BACK
 }
