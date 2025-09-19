@@ -1,0 +1,26 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+
+    <changeSet id="0007-create-freeze-table" author="David Kirakosyan">
+
+        <sql>
+            CREATE TABLE freezes
+            (
+                id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                wallet_иd      UUID          NOT NULL,
+                amount         NUMERIC(19, 2),
+                reason         VARCHAR(500),
+                freeze_status  freeze_status NOT NULL,
+                created_at     TIMESTAMP     NOT NULL,
+                released_at    TIMESTAMP,
+                transaction_id UUID          NOT NULL REFERENCES transactions (id) ON DELETE CASCADE
+            );
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>
