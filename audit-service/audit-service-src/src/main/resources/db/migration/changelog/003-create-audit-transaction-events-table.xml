@@ -1,0 +1,22 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="001-create-audit-wallets-table" author="David Kirakosyan">
+        <sql>
+            CREATE TABLE audit_wallets (
+                                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                         service VARCHAR(100) NOT NULL,
+                                         from_wallet_id UUID,
+                                         to_wallet_id UUID,
+                                         event_type VARCHAR(100) NOT NULL,
+                                         user_id UUID,
+                                         details TEXT NOT NULL,
+                                         created_at TIMESTAMP NOT NULL DEFAULT now()
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
