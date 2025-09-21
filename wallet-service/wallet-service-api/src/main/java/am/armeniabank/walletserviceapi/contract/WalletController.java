@@ -35,9 +35,8 @@ public interface WalletController {
             @ApiResponse(responseCode = "409", description = "Wallet already exists for user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/{userId}")
-    ResponseEntity<WalletResponse> createWallet(@PathVariable("userId") @NotNull UUID userId,
-                                                @RequestParam @NotNull Currency currency);
+    @PostMapping
+    ResponseEntity<WalletResponse> createWallet(@RequestParam @NotNull Currency currency);
 
     @Operation(summary = "Get wallet by ID",
             description = "Retrieves the wallet details for the specified wallet ID")

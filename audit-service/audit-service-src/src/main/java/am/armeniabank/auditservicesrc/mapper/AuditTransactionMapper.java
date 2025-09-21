@@ -13,6 +13,7 @@ public interface AuditTransactionMapper {
     @Mapping(source = "auditTransaction.service", target = "service")
     @Mapping(source = "auditTransaction.fromWalletId", target = "fromWalletId")
     @Mapping(source = "auditTransaction.toWalletId", target = "toWalletId")
+    @Mapping(source = "auditTransaction.transactionId", target = "transactionId")
     @Mapping(source = "auditTransaction.eventType", target = "eventType")
     @Mapping(source = "auditTransaction.userId", target = "userId")
     @Mapping(source = "auditTransaction.details", target = "details")

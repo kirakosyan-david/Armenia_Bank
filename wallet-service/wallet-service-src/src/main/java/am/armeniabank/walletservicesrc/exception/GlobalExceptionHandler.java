@@ -33,6 +33,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(e, error, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleUserNotFound(UserNotFoundException e, WebRequest request) {
+        log.warn("User not found: {}", e.getMessage());
+        RestErrorResponse error = RestErrorResponse.builder()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .errorMessage(e.getMessage())
+                .build();
+        return handleExceptionInternal(e, error, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
     @ExceptionHandler(WalletBlockedException.class)
     public ResponseEntity<Object> handleWalletBlocked(WalletBlockedException e, WebRequest request) {
         log.warn("Wallet is blocked: {}", e.getMessage());

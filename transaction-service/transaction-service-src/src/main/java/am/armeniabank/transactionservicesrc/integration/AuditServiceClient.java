@@ -27,7 +27,8 @@ public class AuditServiceClient {
     @Value("${audit-service.url}")
     private String auditServiceUrl;
 
-    public void sendAuditTransactionEvent(UUID transactionId, UserResponse user, String action) {
+    public void sendAuditTransactionEvent(UUID transactionId, UUID fromWalletId, UUID toWalletId,
+                                          UserResponse user, String action) {
         if (user == null || user.getId() == null) {
             log.warn("User is null or userId is missing, skipping audit event");
             return;
@@ -36,14 +37,18 @@ public class AuditServiceClient {
         String message = String.format("[%s] TransactionId=%s UserId=%s User=%s %s",
                 action, transactionId, user.getId(), user.getFirstName(), user.getLastName());
 
+        System.out.println("messages: " + message);
         AuditTransactionEventRequest request = AuditTransactionEventRequest.builder()
                 .service("Transaction-Service")
                 .transactionId(transactionId)
+                .fromWalletId(fromWalletId) // <- нужно добавить
+                .toWalletId(toWalletId)     // <- нужно добавить
                 .eventType(action)
                 .userId(user.getId())
                 .details(message)
                 .createdAt(LocalDateTime.now())
                 .build();
+        log.debug("Sending audit request: {}", request);
 
         try {
             HttpHeaders headers = new HttpHeaders();

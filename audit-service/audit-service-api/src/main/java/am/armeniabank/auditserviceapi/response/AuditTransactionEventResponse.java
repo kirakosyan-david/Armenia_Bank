@@ -19,6 +19,7 @@ public class AuditTransactionEventResponse {
     private String service;
     private UUID fromWalletId;
     private UUID toWalletId;
+    private UUID transactionId;
     private String eventType;
     private UUID userId;
     private String details;

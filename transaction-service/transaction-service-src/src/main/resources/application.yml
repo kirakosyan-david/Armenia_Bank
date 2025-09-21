@@ -69,6 +69,13 @@ springdoc:
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
 
+#keycloak:
+#  base-url: http://backend-keycloak-auth:8080
+#  token-uri: /realms/ArmeniaBank/protocol/openid-connect/token
+#  realm: ArmeniaBank
+#  client-id: transaction-service
+#  client-secret: transaction-service
+
 audit-service:
   url: http://audit-service:8082
 

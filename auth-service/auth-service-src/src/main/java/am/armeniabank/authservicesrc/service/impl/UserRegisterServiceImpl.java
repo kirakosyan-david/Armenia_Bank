@@ -7,6 +7,7 @@ import am.armeniabank.authserviceapi.response.UserDto;
 import am.armeniabank.authservicesrc.entity.User;
 import am.armeniabank.authservicesrc.entity.UserProfile;
 import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;
+import am.armeniabank.authservicesrc.exception.custom.KeycloakUserCreationException;
 import am.armeniabank.authservicesrc.exception.custom.UserProfileException;
 import am.armeniabank.authservicesrc.handler.UserEventHandler;
 import am.armeniabank.authservicesrc.integration.AuditServiceClient;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -58,7 +60,6 @@ public class UserRegisterServiceImpl implements UserRegisterService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UserDto register(UserRegistrationRequest register) {
         log.info("Registering user: {}", register.getEmail());
 
@@ -72,44 +73,57 @@ public class UserRegisterServiceImpl implements UserRegisterService {
             throw new EmailAlreadyExistsException("Email already exists in Keycloak");
         }
 
+        UUID keycloakUserId;
         try {
-            User user = User.builder()
-                    .email(register.getEmail())
-                    .password(passwordEncoder.encode(register.getPassword()))
-                    .role(UserRole.USER)
-                    .emailVerified(false)
-                    .build();
-
-            UserProfile profile = UserProfile.builder()
-                    .firstName(register.getFirstName())
-                    .lastName(register.getLastName())
-                    .patronymic(register.getPatronymic())
-                    .gender(Gender.OTHER)
-                    .user(user)
-                    .build();
-
-            user.setProfile(profile);
-
-            mailService.sendVerificationEmail(user, register.getPassportNumber());
-            log.info("Verification email sent for user: {}", register.getEmail());
-
-            User userSaved = userRepository.save(user);
-            log.info("User saved in DB with id={}", userSaved.getId());
-
-            keycloakService.createUserInKeycloak(register, user.getRole());
-            log.info("User created in Keycloak for email={}", register.getEmail());
-
-            auditEvetConsumer(register);
-
-            userEventProducer(userSaved);
-
-            return userMapper.toDto(user, profile, user.getVerification());
-
+            keycloakUserId = keycloakService.createUserInKeycloak(register, UserRole.USER);
+            log.info("User created in Keycloak with ID: {}", keycloakUserId);
         } catch (Exception e) {
-            log.error("Error registering user {}: {}", register.getEmail(), e.getMessage(), e);
+            log.error("Failed to create user in Keycloak: {}", e.getMessage(), e);
+            throw new KeycloakUserCreationException("Failed to create user in Keycloak", e);
+        }
+
+        UserDto savedUserDto;
+        try {
+            savedUserDto = saveUserInDb(register, keycloakUserId);
+        } catch (Exception e) {
+            log.error("Failed to save user in DB: {}", e.getMessage(), e);
             throw new UserProfileException("Failed to register user " + register.getEmail(), e);
         }
 
+        return savedUserDto;
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public UserDto saveUserInDb(UserRegistrationRequest register, UUID keycloakUserId) {
+        User user = User.builder()
+                .id(keycloakUserId)
+                .email(register.getEmail())
+                .password(passwordEncoder.encode(register.getPassword()))
+                .role(UserRole.USER)
+                .emailVerified(false)
+                .build();
+
+        UserProfile profile = UserProfile.builder()
+                .firstName(register.getFirstName())
+                .lastName(register.getLastName())
+                .patronymic(register.getPatronymic())
+                .gender(Gender.OTHER)
+                .user(user)
+                .build();
+
+        user.setProfile(profile);
+
+        User savedUser = userRepository.save(user);
+        log.info("User saved in DB with ID: {}", savedUser.getId());
+
+        mailService.sendVerificationEmail(savedUser, register.getPassportNumber());
+        log.info("Verification email sent for user: {}", register.getEmail());
+
+        auditEvetConsumer(register);
+
+        userEventProducer(savedUser);
+
+        return userMapper.toDto(savedUser, profile, savedUser.getVerification());
     }
 
     private void auditEvetConsumer(UserRegistrationRequest register) {

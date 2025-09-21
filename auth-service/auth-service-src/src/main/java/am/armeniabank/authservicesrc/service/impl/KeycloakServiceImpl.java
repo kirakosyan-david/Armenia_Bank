@@ -67,7 +67,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void createUserInKeycloak(UserRegistrationRequest register, UserRole role) {
+    public UUID createUserInKeycloak(UserRegistrationRequest register, UserRole role) {
         log.info("Creating user {} in Keycloak with role {}", register.getEmail(), role);
 
         String accessToken = getAdminAccessToken();
@@ -107,6 +107,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         log.info("Keycloak user created with ID: {}", userId);
 
         assignRoleToUser(role, headers, userId);
+        return UUID.fromString(userId);
     }
 
     @Override

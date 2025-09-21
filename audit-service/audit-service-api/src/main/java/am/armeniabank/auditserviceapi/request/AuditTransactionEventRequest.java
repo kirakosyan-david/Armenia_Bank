@@ -17,6 +17,7 @@ import java.util.UUID;
 public class AuditTransactionEventRequest {
 
     private String service;
+    private UUID transactionId;
     private UUID fromWalletId;
     private UUID toWalletId;
     private String eventType;

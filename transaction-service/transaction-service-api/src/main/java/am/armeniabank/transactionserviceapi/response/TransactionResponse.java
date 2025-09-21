@@ -24,6 +24,7 @@ public class TransactionResponse {
     private UUID id;
     private UUID fromWalletId;
     private UUID toWalletId;
+    private UUID userId;
     private BigDecimal amount;
     private Currency currency;
     private TransactionType type;
