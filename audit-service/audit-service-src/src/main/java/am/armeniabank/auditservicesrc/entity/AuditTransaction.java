@@ -23,7 +23,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "audit_wallets")
+@Table(name = "audit_transactions")
 public class AuditTransaction {
 
     @Id
@@ -35,10 +35,13 @@ public class AuditTransaction {
     @Column(nullable = false, length = 100)
     private String service;
 
-    @Column(name = "from_wallet_id", columnDefinition = "uuid", nullable = false)
+    @Column(name = "transaction_id")
+    private UUID transactionId;
+
+    @Column(name = "from_wallet_id")
     private UUID fromWalletId;
 
-    @Column(name = "to_wallet_id", columnDefinition = "uuid", nullable = false)
+    @Column(name = "to_wallet_id")
     private UUID toWalletId;
 
     @Column(nullable = false, length = 50)

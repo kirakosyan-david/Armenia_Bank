@@ -22,11 +22,10 @@ public class WalletControllerImpl extends BaseController implements WalletContro
     private final WalletService walletService;
 
     @Override
-    public ResponseEntity<WalletResponse> createWallet(UUID userId, Currency currency) {
-        log.info("Creating wallet for userId={} with currency={}", userId, currency);
-
-        WalletResponse wallet = walletService.createWallet(userId, currency);
-        return respond(wallet, userId, "CREATE_WALLET", HttpStatus.CREATED);
+    public ResponseEntity<WalletResponse> createWallet(Currency currency) {
+        WalletResponse wallet = walletService.createWallet(currency);
+        log.info("Creating wallet for userId={} with currency={}", wallet.getUserId(), currency);
+        return respond(wallet, wallet.getUserId(), "CREATE_WALLET", HttpStatus.CREATED);
     }
 
     @Override

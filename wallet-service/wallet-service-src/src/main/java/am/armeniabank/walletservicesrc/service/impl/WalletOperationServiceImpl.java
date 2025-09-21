@@ -17,7 +17,7 @@ import am.armeniabank.walletservicesrc.integration.AuditServiceClient;
 import am.armeniabank.walletservicesrc.mapper.WalletOperationMapper;
 import am.armeniabank.walletservicesrc.repository.WalletOperationRepository;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
-import am.armeniabank.walletservicesrc.security.SecurityUtils;
+import am.armeniabank.walletservicesrc.util.SecurityUtils;
 import am.armeniabank.walletservicesrc.service.WalletOperationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +50,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
     public WalletOperationResponse credit(UUID walletId, WalletOperationRequest request) {
         log.info("Starting CREDIT operation for walletId={} with amount={}", walletId, request.getAmount());
 
-        Wallet wallet = getWallet(walletId, request);
+        Wallet wallet = getWallet(walletId);
         validateAmount(request.getAmount());
         updateBalance(wallet, request.getAmount(), WalletOperationType.CREDIT);
 
@@ -70,7 +70,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
     public WalletOperationResponse debit(UUID walletId, WalletOperationRequest request) {
         log.info("Starting DEBIT operation for walletId={} with amount={}", walletId, request.getAmount());
 
-        Wallet wallet = getWallet(walletId, request);
+        Wallet wallet = getWallet(walletId);
 
         updateBalance(wallet, request.getAmount(), WalletOperationType.DEBIT);
 
@@ -89,7 +89,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
     public WalletOperationResponse freeze(UUID walletId, WalletOperationRequest request) {
         log.info("Starting FREEZE operation for walletId={} with amount={}", walletId, request.getAmount());
 
-        Wallet wallet = getWallet(walletId, request);
+        Wallet wallet = getWallet(walletId);
 
         updateBalance(wallet, request.getAmount(), WalletOperationType.FREEZE);
 
@@ -109,7 +109,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
     public WalletOperationResponse unfreeze(UUID walletId, WalletOperationRequest request) {
         log.info("Starting UNFREEZE operation for walletId={} with amount={}", walletId, request.getAmount());
 
-        Wallet wallet = getWallet(walletId, request);
+        Wallet wallet = getWallet(walletId);
 
         updateBalance(wallet, request.getAmount(), WalletOperationType.UNFREEZE);
 
@@ -162,7 +162,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
         return walletOperationRepository.save(operation);
     }
 
-    private Wallet getWallet(UUID walletId, WalletOperationRequest request) {
+    private Wallet getWallet(UUID walletId) {
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> new WalletNotFoundException(walletId));
 
@@ -229,7 +229,8 @@ public class WalletOperationServiceImpl implements WalletOperationService {
 
     private void sendAudit(Wallet wallet, String action) {
         String token = SecurityUtils.getCurrentToken();
-        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        UUID userId = SecurityUtils.getCurrentUserId();
+        UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, action);
     }
 }

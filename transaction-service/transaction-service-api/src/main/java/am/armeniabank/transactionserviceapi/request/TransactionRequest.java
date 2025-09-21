@@ -24,5 +24,4 @@ public class TransactionRequest {
     private BigDecimal amount;
     private Currency currency;
     private TransactionType type;
-    private String authToken;
 }

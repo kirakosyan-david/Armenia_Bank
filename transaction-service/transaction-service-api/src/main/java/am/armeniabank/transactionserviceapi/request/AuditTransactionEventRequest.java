@@ -27,6 +27,8 @@ public class AuditTransactionEventRequest {
     @NotNull(message = "Wallet ID must not be null")
     private UUID transactionId;
 
+    private UUID fromWalletId;
+    private UUID toWalletId;
     @NotBlank(message = "Event type must not be blank")
     @Size(max = 50, message = "Event type must not exceed 50 characters")
     private String eventType;

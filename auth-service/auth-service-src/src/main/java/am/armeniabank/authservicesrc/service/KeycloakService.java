@@ -10,7 +10,7 @@ public interface KeycloakService {
 
     boolean emailExistsInKeycloak(String email);
 
-    void createUserInKeycloak(UserRegistrationRequest register, UserRole role);
+    UUID createUserInKeycloak(UserRegistrationRequest register, UserRole role);
 
     void updateUserInKeycloak(String currentEmail, UserUpdateRequest request, UserRole role);
 

@@ -11,7 +11,7 @@ import am.armeniabank.walletservicesrc.exception.custom.WalletNotFoundException;
 import am.armeniabank.walletservicesrc.integration.AuditServiceClient;
 import am.armeniabank.walletservicesrc.mapper.WalletMapper;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
-import am.armeniabank.walletservicesrc.security.SecurityUtils;
+import am.armeniabank.walletservicesrc.util.SecurityUtils;
 import am.armeniabank.walletservicesrc.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,8 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public WalletResponse createWallet(UUID userId, Currency currency) {
+    public WalletResponse createWallet( Currency currency) {
+        UUID userId = SecurityUtils.getCurrentUserId();
         log.info("Creating wallet for userId={} with currency={}", userId, currency);
 
         walletRepository.findByUserIdAndCurrency(userId, currency)
@@ -80,11 +81,12 @@ public class WalletServiceImpl implements WalletService {
                     return new WalletNotFoundException(walletId);
                 });
 
+        UUID userId = SecurityUtils.getCurrentUserId();
         String token = SecurityUtils.getCurrentToken();
 
-        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
 
-        log.info("Fetched wallet with id={} for userId={}", walletId, wallet.getUserId());
+        log.info("Fetched wallet with id={} for userId={}", walletId, userId);
         return walletMapper.toWalletResponse(wallet, userById);
     }
 
@@ -117,9 +119,10 @@ public class WalletServiceImpl implements WalletService {
                 });
         wallet.setStatus(WalletStatus.BLOCKED);
         walletRepository.save(wallet);
+        UUID userId = SecurityUtils.getCurrentUserId();
         String token = SecurityUtils.getCurrentToken();
 
-        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-BLOCKED");
 
@@ -140,9 +143,10 @@ public class WalletServiceImpl implements WalletService {
                 });
         wallet.setStatus(WalletStatus.ACTIVE);
         walletRepository.save(wallet);
+        UUID userId = SecurityUtils.getCurrentUserId();
         String token = SecurityUtils.getCurrentToken();
 
-        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-UNBLOCKED");
 
@@ -163,9 +167,10 @@ public class WalletServiceImpl implements WalletService {
                 });
         wallet.setStatus(WalletStatus.CLOSED);
         walletRepository.save(wallet);
+        UUID userId = SecurityUtils.getCurrentUserId();
         String token = SecurityUtils.getCurrentToken();
 
-        UserResponse userById = userApi.getUserById(wallet.getUserId(), "Bearer " + token);
+        UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
 
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, "WALLET-CLOSED");
 

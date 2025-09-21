@@ -8,11 +8,16 @@ import java.util.UUID;
 
 public interface WalletService {
 
-    WalletResponse createWallet(UUID userId, Currency currency);
+    WalletResponse createWallet(Currency currency);
+
     WalletResponse getWalletById(UUID walletId);
+
     List<WalletResponse> getWalletsByUserId(UUID userId);
+
     WalletResponse blockWallet(UUID walletId);
+
     WalletResponse unblockWallet(UUID walletId);
+
     WalletResponse closeWallet(UUID walletId);
 
 }

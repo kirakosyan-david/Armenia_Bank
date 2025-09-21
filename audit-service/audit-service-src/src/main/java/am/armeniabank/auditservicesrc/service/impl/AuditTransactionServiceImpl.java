@@ -27,6 +27,7 @@ public class AuditTransactionServiceImpl implements AuditTransactionService {
                 .service(request.getService())
                 .fromWalletId(request.getFromWalletId())
                 .toWalletId(request.getToWalletId())
+                .transactionId(request.getTransactionId())
                 .eventType(request.getEventType())
                 .userId(request.getUserId())
                 .details(request.getDetails())

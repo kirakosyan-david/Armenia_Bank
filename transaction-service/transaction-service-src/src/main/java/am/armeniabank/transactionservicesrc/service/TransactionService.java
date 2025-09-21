@@ -10,11 +10,11 @@ public interface TransactionService {
 
     TransactionResponse createTransaction(TransactionRequest request);
 
-    TransactionResponse completeTransaction(UUID transactionId, String authToken);
+    TransactionResponse completeTransaction(UUID transactionId);
 
-    TransactionResponse cancelTransaction(UUID transactionId, String reason);
+    TransactionResponse cancelTransaction(UUID transactionId, String token);
 
-    TransactionResponse failTransaction(UUID transactionId, String errorMessage);
+    TransactionResponse failTransaction(UUID transactionId, String token);
 
     TransactionResponse getTransactionById(UUID transactionId);
 
