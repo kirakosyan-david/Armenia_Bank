@@ -1,6 +1,7 @@
 package am.armeniabank.transactionservicesrc.entity;
 
 import am.armeniabank.transactionserviceapi.enums.TransactionState;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -45,5 +46,6 @@ public class TransactionLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id", nullable = false, updatable = false)
+    @JsonBackReference
     private Transaction transaction;
 }
