@@ -2,8 +2,12 @@ package am.armeniabank.transactionservicesrc.controller.impl;
 
 import am.armeniabank.transactionserviceapi.contract.TransactionController;
 import am.armeniabank.transactionserviceapi.request.TransactionRequest;
+import am.armeniabank.transactionserviceapi.response.FreezeListResponse;
+import am.armeniabank.transactionserviceapi.response.FreezeResponse;
+import am.armeniabank.transactionserviceapi.response.ListResponse;
 import am.armeniabank.transactionserviceapi.response.TransactionResponse;
 import am.armeniabank.transactionservicesrc.controller.BaseController;
+import am.armeniabank.transactionservicesrc.service.FreezeService;
 import am.armeniabank.transactionservicesrc.util.SecurityUtils;
 import am.armeniabank.transactionservicesrc.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class TransactionControllerImpl extends BaseController implements TransactionController {
 
     private final TransactionService transactionService;
+    private final FreezeService freezeService;
 
     @Override
     public ResponseEntity<TransactionResponse> createTransaction(TransactionRequest request) {
@@ -64,5 +69,11 @@ public class TransactionControllerImpl extends BaseController implements Transac
         log.info("Fetching transactions for wallet id={}", walletId);
         List<TransactionResponse> transactions = transactionService.getTransactionsByWallet(walletId);
         return respond(transactions, walletId, "GET_WALLET_TRANSACTIONS", HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ListResponse<FreezeResponse>> getActiveFreezes() {
+        List<FreezeResponse> freezes = freezeService.getActiveFreezesForCurrentUser();
+        return respond(freezes, "GET_ACTIVE_FREEZES", HttpStatus.OK, "No active freezes found for the current user");
     }
 }

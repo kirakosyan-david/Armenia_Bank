@@ -1,7 +1,10 @@
 package am.armeniabank.transactionservicesrc.exception;
 
 import am.armeniabank.transactionserviceapi.response.RestErrorResponse;
+import am.armeniabank.transactionservicesrc.exception.custam.FreezeNotFoundException;
+import am.armeniabank.transactionservicesrc.exception.custam.FreezeOperationException;
 import am.armeniabank.transactionservicesrc.exception.custam.InsufficientFundsException;
+import am.armeniabank.transactionservicesrc.exception.custam.InvalidFreezeStateException;
 import am.armeniabank.transactionservicesrc.exception.custam.TransactionFailedException;
 import am.armeniabank.transactionservicesrc.exception.custam.TransactionNotFoundException;
 import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
@@ -31,6 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({
             TransactionNotFoundException.class,
             UserNotFoundException.class,
+            FreezeNotFoundException.class,
             HttpClientErrorException.class
     })
     public ResponseEntity<Object> handleNotFoundExceptions(Exception ex, WebRequest request) {
@@ -64,6 +68,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .errorMessage(ex.getMessage())
                 .build();
         return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.FAILED_DEPENDENCY, request);
+    }
+
+    @ExceptionHandler({
+            InvalidFreezeStateException.class
+    })
+    public ResponseEntity<Object> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
+        log.warn("Bad request: {}", ex.getMessage(), ex);
+        RestErrorResponse errorDto = RestErrorResponse.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .errorMessage(ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler({
+            FreezeOperationException.class
+    })
+    public ResponseEntity<Object> handleInternalServerError(RuntimeException ex, WebRequest request) {
+        log.error("Internal server error: {}", ex.getMessage(), ex);
+        RestErrorResponse errorDto = RestErrorResponse.builder()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .errorMessage(ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, errorDto, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     @ExceptionHandler(Exception.class)

@@ -2,6 +2,8 @@ package am.armeniabank.transactionserviceapi.contract;
 
 import am.armeniabank.transactionserviceapi.constants.ApiConstants;
 import am.armeniabank.transactionserviceapi.request.TransactionRequest;
+import am.armeniabank.transactionserviceapi.response.FreezeResponse;
+import am.armeniabank.transactionserviceapi.response.ListResponse;
 import am.armeniabank.transactionserviceapi.response.TransactionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -106,5 +108,16 @@ public interface TransactionController {
     @GetMapping("/wallet/{walletId}")
     ResponseEntity<List<TransactionResponse>> getTransactionsByWallet(@PathVariable("walletId") UUID walletId);
 
-
+    @Operation(summary = "Get active freezes for a wallet",
+            description = "Retrieves all active freezes associated with the specified wallet for the current user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Active freezes retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters"),
+            @ApiResponse(responseCode = "401", description = "User not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "No active freezes found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/freezes/active")
+    ResponseEntity<ListResponse<FreezeResponse>> getActiveFreezes();
 }
