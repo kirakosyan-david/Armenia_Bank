@@ -2,14 +2,17 @@ package am.armeniabank.transactionservicesrc.service.impl;
 
 import am.armeniabank.transactionserviceapi.contract.UserApi;
 import am.armeniabank.transactionserviceapi.contract.WalletApi;
+import am.armeniabank.transactionserviceapi.enums.FreezeStatus;
 import am.armeniabank.transactionserviceapi.enums.TransactionState;
 import am.armeniabank.transactionserviceapi.enums.TransactionType;
 import am.armeniabank.transactionserviceapi.enums.WalletOperationType;
 import am.armeniabank.transactionserviceapi.request.TransactionRequest;
 import am.armeniabank.transactionserviceapi.request.WalletOperationRequest;
+import am.armeniabank.transactionserviceapi.response.FreezeResponse;
 import am.armeniabank.transactionserviceapi.response.TransactionResponse;
 import am.armeniabank.transactionserviceapi.response.UserResponse;
 import am.armeniabank.transactionserviceapi.response.WalletResponse;
+import am.armeniabank.transactionservicesrc.entity.Freeze;
 import am.armeniabank.transactionservicesrc.entity.Transaction;
 import am.armeniabank.transactionservicesrc.entity.TransactionLog;
 import am.armeniabank.transactionservicesrc.exception.custam.InsufficientFundsException;
@@ -19,12 +22,19 @@ import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundExcepti
 import am.armeniabank.transactionservicesrc.integration.AuditServiceClient;
 import am.armeniabank.transactionservicesrc.mapper.TransactionMapper;
 import am.armeniabank.transactionservicesrc.repository.TransactionRepository;
+import am.armeniabank.transactionservicesrc.service.FreezeService;
 import am.armeniabank.transactionservicesrc.service.WalletTransactionService;
 import am.armeniabank.transactionservicesrc.util.SecurityUtils;
 import am.armeniabank.transactionservicesrc.service.TransactionService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -45,7 +56,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final WalletApi walletApi;
     private final AuditServiceClient auditClient;
     private final WalletTransactionService walletTransactionService;
-
+    private final FreezeService freezeService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -80,7 +92,18 @@ public class TransactionServiceImpl implements TransactionService {
 
         transactionRepository.save(transaction);
 
-        auditClient.sendAuditTransactionEvent(transaction.getId(), transaction.getFromWalletId(), transaction.getToWalletId(), user, "CREATED");
+        FreezeResponse freeze = freezeService.createFreeze(transaction, request.getAmount(),
+                "Transaction created", token);
+
+        log.info("Freeze created: id={}, walletId={}, amount={}", freeze.getId(), freeze.getWalletId(), freeze.getAmount());
+
+        auditClient.sendAuditTransactionEvent(transaction.getId(), transaction.getFromWalletId(),
+                transaction.getToWalletId(), user, "CREATED");
+
+        Cache transactionsCache = cacheManager.getCache("transactions");
+        if (transactionsCache != null) {
+            transactionsCache.put(transaction.getId(), transactionMapper.mapToTransactionResponse(transaction));
+        }
 
         return transactionMapper.mapToTransactionResponse(transaction);
     }
@@ -96,9 +119,20 @@ public class TransactionServiceImpl implements TransactionService {
             walletTransactionService.debit(transaction, token);
             walletTransactionService.credit(transaction, token);
 
+            Freeze freeze = freezeService.getFreezeByTransaction(transactionId);
+            freezeService.completeFreeze(freeze);
             transaction.setStatus(TransactionState.COMPLETED);
             transaction.setUpdatedAt(LocalDateTime.now());
             transactionRepository.save(transaction);
+
+            Optional.ofNullable(cacheManager.getCache("transactions"))
+                    .ifPresent(cache -> cache.put(transactionId, transactionMapper.mapToTransactionResponse(transaction)));
+
+            Optional.ofNullable(cacheManager.getCache("wallets"))
+                    .ifPresent(cache -> {
+                        cache.evict(transaction.getFromWalletId());
+                        cache.evict(transaction.getToWalletId());
+                    });
 
             logTransactionCreated(transaction, "COMPLETED");
 
@@ -110,6 +144,7 @@ public class TransactionServiceImpl implements TransactionService {
                         user,
                         "COMPLETED");
             }
+            updateCaches(transaction);
 
             return transactionMapper.mapToTransactionResponse(transaction);
 
@@ -130,6 +165,13 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             walletTransactionService.unfreeze(transaction, token);
 
+            Freeze freeze = freezeService.getFreezeByTransaction(transactionId);
+            FreezeResponse freezeResponse = freezeService.releaseFreeze(freeze, token);
+            log.info("Released freeze {} for transaction {} and wallet {}",
+                    freezeResponse.getId(),
+                    transaction.getId(),
+                    freezeResponse.getWalletId());
+
             transaction.setStatus(TransactionState.ROLLED_BACK);
             transaction.setUpdatedAt(LocalDateTime.now());
             transactionRepository.save(transaction);
@@ -144,6 +186,8 @@ public class TransactionServiceImpl implements TransactionService {
                         user,
                         "ROLLED_BACK");
             }
+
+            updateCaches(transaction);
 
             return transactionMapper.mapToTransactionResponse(transaction);
         } catch (Exception e) {
@@ -165,13 +209,35 @@ public class TransactionServiceImpl implements TransactionService {
 
         UserResponse user = userApi.getUserById(userId, "Bearer " + token);
         if (user != null) {
-            auditClient.sendAuditTransactionEvent(transaction.getId(), transaction.getFromWalletId(), transaction.getToWalletId(), user, "FAILED");
+            auditClient.sendAuditTransactionEvent(transaction.getId(),
+                    transaction.getFromWalletId(),
+                    transaction.getToWalletId(),
+                    user,
+                    "FAILED");
         }
+
+        try {
+            Freeze freeze = freezeService.getFreezeByTransaction(transactionId);
+            if (freeze != null && freeze.getFreezeStatus() == FreezeStatus.ACTIVE) {
+                FreezeResponse freezeResponse = freezeService.releaseFreeze(freeze, token);
+                log.info("Freeze released: id={}, status={}, transactionId={}, walletId={}",
+                        freezeResponse.getId(),
+                        freezeResponse.getFreezeStatus(),
+                        transaction.getId(),
+                        freezeResponse.getWalletId());
+            }
+        } catch (Exception ex) {
+            log.warn("Freeze release failed for FAILED transaction {}", transactionId, ex);
+        }
+
+        updateCaches(transaction);
+
         return transactionMapper.mapToTransactionResponse(transaction);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "transactions", key = "#transactionId")
     public TransactionResponse getTransactionById(UUID transactionId) {
         Transaction transaction = getTransactionId(transactionId);
         return transactionMapper.mapToTransactionResponse(transaction);
@@ -179,6 +245,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "wallets", key = "#walletId")
     public List<TransactionResponse> getTransactionsByWallet(UUID walletId) {
         return transactionRepository.findByFromWalletIdOrToWalletId(walletId, walletId)
                 .stream()
@@ -216,18 +283,44 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             UserResponse user = userApi.getUserById(userId, "Bearer " + token);
             if (user != null) {
-                auditClient.sendAuditTransactionEvent(
-                        transaction.getId(),
+                auditClient.sendAuditTransactionEvent(transaction.getId(),
                         transaction.getFromWalletId(),
                         transaction.getToWalletId(),
                         user,
-                        "FAILED"
-                );
+                        "FAILED");
             }
         } catch (Exception ex) {
             log.warn("Failed to send audit event for FAILED transaction {}", transactionId, ex);
         }
 
+        try {
+            Freeze freeze = freezeService.getFreezeByTransaction(transactionId);
+            if (freeze != null && freeze.getFreezeStatus() == am.armeniabank.transactionserviceapi.enums.FreezeStatus.ACTIVE) {
+                FreezeResponse freezeResponse = freezeService.releaseFreeze(freeze, token);
+
+                log.info("Freeze released: id={}, status={}, transactionId={}, walletId={}",
+                        freezeResponse.getId(),
+                        freezeResponse.getFreezeStatus(),
+                        transaction.getId(),
+                        freezeResponse.getWalletId());
+            }
+        } catch (Exception ex) {
+            log.warn("Freeze release failed for FAILED transaction {}", transactionId, ex);
+        }
+
         throw new TransactionFailedException("Transaction failed", e);
+    }
+
+    private void updateCaches(Transaction transaction) {
+        Cache transactionsCache = cacheManager.getCache("transactions");
+        if (transactionsCache != null) {
+            transactionsCache.put(transaction.getId(), transactionMapper.mapToTransactionResponse(transaction));
+        }
+
+        Cache walletsCache = cacheManager.getCache("wallets");
+        if (walletsCache != null) {
+            walletsCache.evict(transaction.getFromWalletId());
+            walletsCache.evict(transaction.getToWalletId());
+        }
     }
 }

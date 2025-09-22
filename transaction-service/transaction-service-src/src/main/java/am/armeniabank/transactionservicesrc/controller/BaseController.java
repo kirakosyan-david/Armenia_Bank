@@ -1,5 +1,6 @@
 package am.armeniabank.transactionservicesrc.controller;
 
+import am.armeniabank.transactionserviceapi.response.ListResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,4 +30,14 @@ public abstract class BaseController {
             return new ResponseEntity<>(status);
         }
     }
+
+    protected <T> ResponseEntity<ListResponse<T>> respond(List<T> body, String operation, HttpStatus status, String emptyMessage) {
+        if (body == null || body.isEmpty()) {
+            log.info("{} operation: {}", operation, emptyMessage);
+            return new ResponseEntity<>(new ListResponse<>(List.of(), emptyMessage), status);
+        }
+        log.info("{} operation completed successfully, list size={}", operation, body.size());
+        return new ResponseEntity<>(new ListResponse<>(body, null), status);
+    }
+
 }
