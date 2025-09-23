@@ -8,6 +8,7 @@ import am.armeniabank.transactionservicesrc.exception.custam.FreezeNotFoundExcep
 import am.armeniabank.transactionservicesrc.exception.custam.FreezeOperationException;
 import am.armeniabank.transactionservicesrc.exception.custam.InvalidFreezeStateException;
 import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
+import am.armeniabank.transactionservicesrc.kafka.model.FreezeEvent;
 import am.armeniabank.transactionservicesrc.mapper.FreezeMapper;
 import am.armeniabank.transactionservicesrc.repository.FreezeRepository;
 import am.armeniabank.transactionservicesrc.service.FreezeService;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class FreezeServiceImpl implements FreezeService {
 
     private final FreezeRepository freezeRepository;
     private final FreezeMapper freezeMapper;
+    private final KafkaTemplate<String, FreezeEvent> kafkaTemplate;
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -59,6 +62,8 @@ public class FreezeServiceImpl implements FreezeService {
 
         log.info("Created freeze {} for wallet {} amount {}", savedFreeze.getId(), transaction.getFromWalletId(), amount);
 
+        sendFreezeEvent(savedFreeze);
+
         return freezeMapper.mapToFreezeResponse(savedFreeze);
     }
 
@@ -84,6 +89,8 @@ public class FreezeServiceImpl implements FreezeService {
 
         log.info("Released freeze {} for wallet {}", saved.getId(), saved.getWalletId());
 
+        sendFreezeEvent(saved);
+
         return freezeMapper.mapToFreezeResponse(saved);
     }
 
@@ -108,6 +115,8 @@ public class FreezeServiceImpl implements FreezeService {
             freeze.setReleasedAt(LocalDateTime.now());
             Freeze saved = freezeRepository.save(freeze);
             log.info("Completed freeze {} for wallet {}", saved.getId(), saved.getWalletId());
+
+            sendFreezeEvent(saved);
 
         } catch (Exception ex) {
             throw new FreezeOperationException("Failed to complete freeze " + freeze.getId(), ex);
@@ -137,5 +146,18 @@ public class FreezeServiceImpl implements FreezeService {
         return freezes.stream()
                 .map(freezeMapper::mapToFreezeResponse)
                 .toList();
+    }
+
+    private void sendFreezeEvent(Freeze freeze) {
+        FreezeEvent event = FreezeEvent.builder()
+                .freezeId(freeze.getId())
+                .transactionId(freeze.getTransaction().getId())
+                .walletId(freeze.getWalletId())
+                .freezeStatus(freeze.getFreezeStatus())
+                .amount(freeze.getAmount())
+                .createdAt(LocalDateTime.now())
+                .build();
+        kafkaTemplate.send("freeze-events", event);
+        log.info("Sent FreezeEvent to Kafka: {}", event);
     }
 }

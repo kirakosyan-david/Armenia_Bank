@@ -5,9 +5,7 @@ import am.armeniabank.transactionserviceapi.contract.WalletApi;
 import am.armeniabank.transactionserviceapi.enums.FreezeStatus;
 import am.armeniabank.transactionserviceapi.enums.TransactionState;
 import am.armeniabank.transactionserviceapi.enums.TransactionType;
-import am.armeniabank.transactionserviceapi.enums.WalletOperationType;
 import am.armeniabank.transactionserviceapi.request.TransactionRequest;
-import am.armeniabank.transactionserviceapi.request.WalletOperationRequest;
 import am.armeniabank.transactionserviceapi.response.FreezeResponse;
 import am.armeniabank.transactionserviceapi.response.TransactionResponse;
 import am.armeniabank.transactionserviceapi.response.UserResponse;
@@ -20,25 +18,23 @@ import am.armeniabank.transactionservicesrc.exception.custam.TransactionFailedEx
 import am.armeniabank.transactionservicesrc.exception.custam.TransactionNotFoundException;
 import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
 import am.armeniabank.transactionservicesrc.integration.AuditServiceClient;
+import am.armeniabank.transactionservicesrc.kafka.model.TransactionEvent;
 import am.armeniabank.transactionservicesrc.mapper.TransactionMapper;
 import am.armeniabank.transactionservicesrc.repository.TransactionRepository;
 import am.armeniabank.transactionservicesrc.service.FreezeService;
+import am.armeniabank.transactionservicesrc.service.TransactionService;
 import am.armeniabank.transactionservicesrc.service.WalletTransactionService;
 import am.armeniabank.transactionservicesrc.util.SecurityUtils;
-import am.armeniabank.transactionservicesrc.service.TransactionService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -58,6 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final WalletTransactionService walletTransactionService;
     private final FreezeService freezeService;
     private final CacheManager cacheManager;
+    private final KafkaTemplate<String, TransactionEvent> kafkaTemplate;
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -95,6 +92,8 @@ public class TransactionServiceImpl implements TransactionService {
         FreezeResponse freeze = freezeService.createFreeze(transaction, request.getAmount(),
                 "Transaction created", token);
 
+        sendTransactionEvent(transaction, "Initial transaction freeze");
+
         log.info("Freeze created: id={}, walletId={}, amount={}", freeze.getId(), freeze.getWalletId(), freeze.getAmount());
 
         auditClient.sendAuditTransactionEvent(transaction.getId(), transaction.getFromWalletId(),
@@ -109,7 +108,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public TransactionResponse completeTransaction(UUID transactionId) {
         UUID userId = SecurityUtils.getCurrentUserId();
         String token = SecurityUtils.getCurrentToken();
@@ -144,6 +143,9 @@ public class TransactionServiceImpl implements TransactionService {
                         user,
                         "COMPLETED");
             }
+
+            sendTransactionEvent(transaction, "Transaction completed");
+
             updateCaches(transaction);
 
             return transactionMapper.mapToTransactionResponse(transaction);
@@ -156,7 +158,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public TransactionResponse cancelTransaction(UUID transactionId, String token) {
         UUID userId = SecurityUtils.getCurrentUserId();
 
@@ -186,6 +188,8 @@ public class TransactionServiceImpl implements TransactionService {
                         user,
                         "ROLLED_BACK");
             }
+
+            sendTransactionEvent(transaction, "Transaction rolled back");
 
             updateCaches(transaction);
 
@@ -229,6 +233,8 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (Exception ex) {
             log.warn("Freeze release failed for FAILED transaction {}", transactionId, ex);
         }
+
+        sendTransactionEvent(transaction, "Transaction failed");
 
         updateCaches(transaction);
 
@@ -322,5 +328,21 @@ public class TransactionServiceImpl implements TransactionService {
             walletsCache.evict(transaction.getFromWalletId());
             walletsCache.evict(transaction.getToWalletId());
         }
+    }
+
+    private void sendTransactionEvent(Transaction transaction, String reason) {
+        TransactionEvent event = TransactionEvent.builder()
+                .transactionId(transaction.getId())
+                .fromWalletId(transaction.getFromWalletId())
+                .toWalletId(transaction.getToWalletId())
+                .userId(transaction.getUserId())
+                .amount(transaction.getAmount())
+                .currency(transaction.getCurrency())
+                .type(transaction.getType())
+                .status(transaction.getStatus())
+                .timestamp(LocalDateTime.now())
+                .reason(reason)
+                .build();
+        kafkaTemplate.send("transaction-events", event);
     }
 }
