@@ -23,4 +23,6 @@ public interface FreezeRepository extends JpaRepository<Freeze, UUID> {
     List<Freeze> findAllByTransactionUserIdAndFreezeStatus(@Param("userId") UUID userId,
                                                            @Param("status") FreezeStatus status);
 
+    Optional<Freeze> findByTransactionIdAndFreezeStatus(UUID id, FreezeStatus freezeStatus);
+
 }

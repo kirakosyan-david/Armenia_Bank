@@ -49,8 +49,13 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 5
+      properties:
+        enable.idempotence: true
     topic:
-      wallet-events: transaction-events-topic
+      transaction-events: transaction-events-topic
+      freeze-events: freeze-events-topic
       audit-events: audit-events-topic
 
 
@@ -59,8 +64,8 @@ springdoc:
     oauth2-redirect-url: http://localhost:8081/swagger-ui/oauth2-redirect.html
     use-root-path: true
     oauth:
-      client-id: wallet_service
-      client-secret: wallet_service
+      client-id: transaction_service
+      client-secret: transaction_service
       use-pkce-with-authorization-code-grant: true
 
   api-docs:
@@ -68,13 +73,6 @@ springdoc:
 
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
-
-#keycloak:
-#  base-url: http://backend-keycloak-auth:8080
-#  token-uri: /realms/ArmeniaBank/protocol/openid-connect/token
-#  realm: ArmeniaBank
-#  client-id: transaction-service
-#  client-secret: transaction-service
 
 audit-service:
   url: http://audit-service:8082
@@ -90,3 +88,5 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: DEBUG
+    org.apache.kafka: INFO
+    org.springframework.kafka: INFO
