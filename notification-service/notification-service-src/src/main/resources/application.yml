@@ -1,0 +1,91 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notification-service
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://backend-keycloak-auth:8080/realms/ArmeniaBank
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notification_service
+    username: notification_service
+    password: notification_service
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+  cache:
+    type: redis
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: armenia_bank
+      timeout: 60000
+
+  liquibase:
+    change-log: classpath:/db/migration/changelog.xml
+    default-schema: notification_service
+    clear-checksums: true
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    admin:
+      auto-create: true
+    consumer:
+      group-id: my-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 5
+      properties:
+        enable.idempotence: true
+    topic:
+      transaction-events: notification-events-topic
+      audit-events: audit-events-topic
+
+
+springdoc:
+  swagger-ui:
+    oauth2-redirect-url: http://localhost:8081/swagger-ui/oauth2-redirect.html
+    use-root-path: true
+    oauth:
+      client-id: notification_service
+      client-secret: notification_service
+      use-pkce-with-authorization-code-grant: true
+
+  api-docs:
+    path: /v3/api-docs
+
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+audit-service:
+  url: http://audit-service:8082
+
+auth-service:
+  url: http://auth-service:8081
+
+wallet-service:
+  url: http://wallet-service:8083
+
+logging:
+  config: classpath:/logback-spring.xml
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.apache.kafka: INFO
+    org.springframework.kafka: INFO

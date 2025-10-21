@@ -11,8 +11,8 @@ import am.armeniabank.walletservicesrc.exception.custom.WalletNotFoundException;
 import am.armeniabank.walletservicesrc.integration.AuditServiceClient;
 import am.armeniabank.walletservicesrc.mapper.WalletMapper;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
-import am.armeniabank.walletservicesrc.util.SecurityUtils;
 import am.armeniabank.walletservicesrc.service.WalletService;
+import am.armeniabank.walletservicesrc.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -38,7 +38,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public WalletResponse createWallet( Currency currency) {
+    public WalletResponse createWallet(Currency currency) {
         UUID userId = SecurityUtils.getCurrentUserId();
         log.info("Creating wallet for userId={} with currency={}", userId, currency);
 

@@ -1,6 +1,5 @@
 package am.armeniabank.transactionservicesrc.entity;
 
-
 import am.armeniabank.transactionserviceapi.enums.Currency;
 import am.armeniabank.transactionserviceapi.enums.TransactionState;
 import am.armeniabank.transactionserviceapi.enums.TransactionType;
