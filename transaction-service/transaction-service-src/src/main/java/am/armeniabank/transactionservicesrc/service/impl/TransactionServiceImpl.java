@@ -18,6 +18,7 @@ import am.armeniabank.transactionservicesrc.exception.custam.TransactionFailedEx
 import am.armeniabank.transactionservicesrc.exception.custam.TransactionNotFoundException;
 import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
 import am.armeniabank.transactionservicesrc.integration.AuditServiceClient;
+import am.armeniabank.transactionservicesrc.integration.NotificationServiceClient;
 import am.armeniabank.transactionservicesrc.kafka.model.TransactionEvent;
 import am.armeniabank.transactionservicesrc.mapper.TransactionMapper;
 import am.armeniabank.transactionservicesrc.repository.TransactionRepository;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserApi userApi;
     private final WalletApi walletApi;
     private final AuditServiceClient auditClient;
+    private final NotificationServiceClient notificationServiceClient;
     private final WalletTransactionService walletTransactionService;
     private final FreezeService freezeService;
     private final CacheManager cacheManager;
@@ -93,6 +96,8 @@ public class TransactionServiceImpl implements TransactionService {
                 "Transaction created", token);
 
         sendTransactionEvent(transaction, "Initial transaction freeze");
+
+        sendTransactionNotifications(transaction, token);
 
         log.info("Freeze created: id={}, walletId={}, amount={}", freeze.getId(), freeze.getWalletId(), freeze.getAmount());
 
@@ -144,6 +149,8 @@ public class TransactionServiceImpl implements TransactionService {
                         "COMPLETED");
             }
 
+            sendTransactionNotifications(transaction, token);
+
             sendTransactionEvent(transaction, "Transaction completed");
 
             updateCaches(transaction);
@@ -189,6 +196,8 @@ public class TransactionServiceImpl implements TransactionService {
                         "ROLLED_BACK");
             }
 
+            sendTransactionNotifications(transaction, token);
+
             sendTransactionEvent(transaction, "Transaction rolled back");
 
             updateCaches(transaction);
@@ -233,6 +242,8 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (Exception ex) {
             log.warn("Freeze release failed for FAILED transaction {}", transactionId, ex);
         }
+
+        sendTransactionNotifications(transaction, token);
 
         sendTransactionEvent(transaction, "Transaction failed");
 
@@ -345,4 +356,35 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
         kafkaTemplate.send("transaction-events", event);
     }
+
+    private void sendTransactionNotifications(Transaction transaction, String token) {
+        try {
+            BigDecimal senderBalance = walletApi.getWalletInfo(transaction.getFromWalletId(), "Bearer " + token).getBalance();
+            BigDecimal receiverBalance = walletApi.getWalletInfo(transaction.getToWalletId(), "Bearer " + token).getBalance();
+
+            String senderMessage = "Your transaction " + transaction.getId() + " of " +
+                    transaction.getAmount() + " " + transaction.getCurrency() +
+                    " is " + transaction.getStatus() +
+                    ". Your current balance: " + senderBalance + " " + transaction.getCurrency();
+
+            String receiverMessage = "You received " + transaction.getAmount() + " " + transaction.getCurrency() +
+                    " from wallet " + transaction.getFromWalletId() +
+                    ". Your current balance: " + receiverBalance + " " + transaction.getCurrency();
+
+            notificationServiceClient.sendTransactionNotification(
+                    transaction.getUserId(),         // senderId
+                    transaction.getToWalletId(),     // receiverId
+                    transaction.getAmount(),
+                    transaction.getCurrency(),
+                    senderMessage,
+                    receiverMessage,
+                    token
+            );
+
+            log.info("Transaction notifications sent for transaction {}", transaction.getId());
+        } catch (Exception ex) {
+            log.error("Failed to send transaction notifications for transaction {}: {}", transaction.getId(), ex.getMessage(), ex);
+        }
+    }
+
 }

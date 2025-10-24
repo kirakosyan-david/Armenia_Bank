@@ -39,16 +39,30 @@ spring:
         - id: audit-service
           uri: http://audit-service:8082
           predicates:
-            - Path=/api/users/**
+            - Path=/api/audit/**
           filters:
             - StripPrefix=2
 
-    #        - id: payment-service
-    #          uri: http://payment-service:8082
-    #          predicates:
-    #            - Path=/api/payments/**
-    #          filters:
-    #            - StripPrefix=2
+        - id: wallet-service
+          uri: http://wallet-service:8083
+          predicates:
+            - Path=/api/wallets/**
+          filters:
+            - StripPrefix=2
+
+        - id: transaction-service
+          uri: http://transaction-service:8084
+          predicates:
+            - Path=/api/transactions/**
+          filters:
+            - StripPrefix=2
+
+        - id: notification-service
+          uri: http://notification-service:8085
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=2
 
 
   security:

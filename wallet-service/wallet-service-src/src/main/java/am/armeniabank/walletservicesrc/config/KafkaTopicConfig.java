@@ -41,14 +41,24 @@ public class KafkaTopicConfig {
     }
 
     @Bean
+    public NewTopic notificationEventsTopic(@Value("${spring.kafka.topic.notification-events}") String topic) {
+        return TopicBuilder.name(topic)
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
     public boolean checkTopicsExist(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
                                     @Value("${spring.kafka.topic.wallet-events}") String walletTopic,
-                                    @Value("${spring.kafka.topic.audit-events}") String auditTopic) throws ExecutionException, InterruptedException {
+                                    @Value("${spring.kafka.topic.audit-events}") String auditTopic,
+                                    @Value("${spring.kafka.topic.audit-events}") String notificationTopic) throws ExecutionException, InterruptedException {
         try (AdminClient client = AdminClient.create(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers))) {
             var existingTopics = client.listTopics().names().get();
             System.out.println("Existing topics: " + existingTopics);
             System.out.println(walletTopic + " exists? " + existingTopics.contains(walletTopic));
             System.out.println(auditTopic + " exists? " + existingTopics.contains(auditTopic));
+            System.out.println(notificationTopic + " exists? " + existingTopics.contains(notificationTopic));
         }
         return true;
     }

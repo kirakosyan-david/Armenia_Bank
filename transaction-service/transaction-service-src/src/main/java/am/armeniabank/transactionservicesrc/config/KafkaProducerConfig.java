@@ -1,6 +1,7 @@
 package am.armeniabank.transactionservicesrc.config;
 
 import am.armeniabank.transactionservicesrc.kafka.model.FreezeEvent;
+import am.armeniabank.transactionservicesrc.kafka.model.NotificationEvent;
 import am.armeniabank.transactionservicesrc.kafka.model.TransactionEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -59,6 +61,21 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, FreezeEvent> freezeEventKafkaTemplate(
             ProducerFactory<String, FreezeEvent> pf) {
+        return new KafkaTemplate<>(pf);
+    }
+
+    @Bean
+    @Primary
+    public ProducerFactory<String, NotificationEvent> notificationEventProducerFactory(KafkaProperties props) {
+        Map<String, Object> config = new HashMap<>(props.buildProducerProperties());
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, NotificationEvent> notificationEventKafkaTemplate(
+            ProducerFactory<String, NotificationEvent> pf) {
         return new KafkaTemplate<>(pf);
     }
 }

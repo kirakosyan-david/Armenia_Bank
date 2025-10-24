@@ -32,8 +32,22 @@ public interface NotificationController {
             @ApiResponse(responseCode = "409", description = "Notification already exists for user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping
+    @PostMapping("/message")
     ResponseEntity<NotificationResponse> createNotification(@RequestBody @NotNull NotificationRequest notification);
+
+
+    @Operation(summary = "Send notification for user",
+            description = "Sends a new notification for the specified user with the chosen currency")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notification send successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters"),
+            @ApiResponse(responseCode = "401", description = "User not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "409", description = "Notification already exists for user"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping
+    ResponseEntity<NotificationResponse> sendNotification(@RequestBody @NotNull NotificationRequest notification);
 
     @Operation(summary = "Get notification by ID",
             description = "Retrieves the notification details for the specified notification ID")

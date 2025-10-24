@@ -55,6 +55,7 @@ spring:
         enable.idempotence: true
     topic:
       transaction-events: transaction-events-topic
+      notification-events: notification-events-topic
       freeze-events: freeze-events-topic
       audit-events: audit-events-topic
 
@@ -82,6 +83,9 @@ auth-service:
 
 wallet-service:
   url: http://wallet-service:8083
+
+notification-service:
+  url: http://notification-service:8085
 
 logging:
   config: classpath:/logback-spring.xml

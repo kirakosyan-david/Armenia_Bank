@@ -14,6 +14,7 @@ import am.armeniabank.walletservicesrc.exception.custom.InvalidAmountException;
 import am.armeniabank.walletservicesrc.exception.custom.WalletBlockedException;
 import am.armeniabank.walletservicesrc.exception.custom.WalletNotFoundException;
 import am.armeniabank.walletservicesrc.integration.AuditServiceClient;
+import am.armeniabank.walletservicesrc.integration.NotificationServiceClient;
 import am.armeniabank.walletservicesrc.mapper.WalletOperationMapper;
 import am.armeniabank.walletservicesrc.repository.WalletOperationRepository;
 import am.armeniabank.walletservicesrc.repository.WalletRepository;
@@ -42,6 +43,7 @@ public class WalletOperationServiceImpl implements WalletOperationService {
     private final WalletRepository walletRepository;
     private final WalletOperationMapper walletOperationMapper;
     private final AuditServiceClient auditClient;
+    private final NotificationServiceClient notificationServiceClient;
     private final UserApi userApi;
 
     @Override
@@ -58,6 +60,14 @@ public class WalletOperationServiceImpl implements WalletOperationService {
                 WalletOperationReason.BONUS, WalletOperationType.CREDIT);
 
         sendAudit(wallet, "WALLET-CREDITED");
+
+        sendNotification(wallet, request.getAmount(),
+                "Top up your wallet",
+                String.format("Your wallet has been credited %.2f %s. Current balance: %.2f %s.",
+                        request.getAmount(),
+                        wallet.getCurrency().name(),
+                        wallet.getBalance(),
+                        wallet.getCurrency().name()));
 
         log.info("CREDIT operation completed successfully for walletId={} newBalance={}", walletId, wallet.getBalance());
         return walletOperationMapper.toWalletOperation(saved);
@@ -78,6 +88,15 @@ public class WalletOperationServiceImpl implements WalletOperationService {
                 WalletOperationReason.PAYMENT, WalletOperationType.DEBIT);
 
         sendAudit(wallet, "WALLET-DEBITED");
+
+        sendNotification(wallet,
+                request.getAmount().negate(),
+                "Write-off of funds",
+                String.format("Your wallet has been debited %.2f %s. Remainder: %.2f %s.",
+                        request.getAmount(),
+                        wallet.getCurrency().name(),
+                        wallet.getBalance(),
+                        wallet.getCurrency().name()));
 
         log.info("DEBIT operation completed successfully for walletId={} newBalance={}", walletId, wallet.getBalance());
         return walletOperationMapper.toWalletOperation(saved);
@@ -232,5 +251,21 @@ public class WalletOperationServiceImpl implements WalletOperationService {
         UUID userId = SecurityUtils.getCurrentUserId();
         UserResponse userById = userApi.getUserById(userId, "Bearer " + token);
         auditClient.sendAuditWalletEvent(wallet.getId(), userById, action);
+    }
+
+    private void sendNotification(Wallet wallet, BigDecimal amount, String title, String message) {
+        try {
+            String token = SecurityUtils.getCurrentToken();
+            UUID userId = SecurityUtils.getCurrentUserId();
+            UserResponse user = userApi.getUserById(userId, "Bearer " + token);
+            notificationServiceClient.sendNotificationWalletEvent(user.getId(),
+                    amount,
+                    java.util.Currency.getInstance(wallet.getCurrency().name()),
+                    title,
+                    message,
+                    token);
+        } catch (Exception e) {
+            log.error("Failed to send notification for walletId={} : {}", wallet.getId(), e.getMessage());
+        }
     }
 }

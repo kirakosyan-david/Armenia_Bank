@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EventProducerTransactionImpl implements EventProducer<TransactionEvent> {
 
-    private final KafkaTemplate<String, TransactionEvent> kafkaTemplate;
+    private final KafkaTemplate<String, TransactionEvent> treansactionKafkaTemplate;
 
     @Value("${spring.kafka.topic.transaction-events}")
     private String transactionTopic;
 
     @Override
     public void handle(TransactionEvent event) {
-        kafkaTemplate.send(transactionTopic, event.getTransactionId().toString(), event);
+        treansactionKafkaTemplate.send(transactionTopic, event.getTransactionId().toString(), event);
         log.info("Sent TransactionEvent: {}", event);
     }
 }

@@ -1,6 +1,7 @@
 package am.armeniabank.walletservicesrc.config;
 
 import am.armeniabank.walletservicesrc.kafka.model.AuditEvent;
+import am.armeniabank.walletservicesrc.kafka.model.NotificationEvent;
 import am.armeniabank.walletservicesrc.kafka.model.WalletEvent;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -42,6 +43,19 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, AuditEvent> auditEventKafkaTemplate(
             ProducerFactory<String, AuditEvent> pf) {
+        return new KafkaTemplate<>(pf);
+    }
+
+    @Bean
+    public ProducerFactory<String, NotificationEvent> notificationEventProducerFactory(KafkaProperties props) {
+        Map<String, Object> config = new HashMap<>(props.buildProducerProperties());
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, NotificationEvent> notificationEventKafkaTemplate(
+            ProducerFactory<String, NotificationEvent> pf) {
         return new KafkaTemplate<>(pf);
     }
 }

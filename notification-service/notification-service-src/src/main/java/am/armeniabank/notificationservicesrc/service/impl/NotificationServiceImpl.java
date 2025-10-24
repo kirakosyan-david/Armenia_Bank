@@ -43,7 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        log.info("Отправлено уведомление пользователю {} {} ({}): {}",
+        log.info("Notification sent to user {} {} ({}): {}",
                 user.getFirstName(), user.getLastName(), userId, saved.getMessage());
         return notificationMapper.mapToNotificationResponse(saved);
     }

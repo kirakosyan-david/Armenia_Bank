@@ -52,6 +52,7 @@ spring:
     topic:
       wallet-events: wallet-events-topic
       audit-events: audit-events-topic
+      notification-events: notification-events-topic
 
 
 springdoc:
@@ -71,6 +72,9 @@ springdoc:
 
 audit-service:
   url: http://audit-service:8082
+
+notification-service:
+  url: http://notification-service:8085
 
 auth-service:
   url: http://auth-service:8081

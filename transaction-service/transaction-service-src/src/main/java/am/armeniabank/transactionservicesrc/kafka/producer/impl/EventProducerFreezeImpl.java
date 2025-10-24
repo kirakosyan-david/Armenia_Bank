@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EventProducerFreezeImpl implements EventProducer<FreezeEvent> {
 
-    private final KafkaTemplate<String, FreezeEvent> kafkaTemplate;
+    private final KafkaTemplate<String, FreezeEvent> freezeKafkaTemplate;
 
     @Value("${spring.kafka.topic.freeze-events}")
     private String freezeTopic;
 
     @Override
     public void handle(FreezeEvent event) {
-        kafkaTemplate.send(freezeTopic, event.getFreezeId().toString(), event);
+        freezeKafkaTemplate.send(freezeTopic, event.getFreezeId().toString(), event);
         log.info("Sent FreezeEvent: {}", event);
     }
 }
