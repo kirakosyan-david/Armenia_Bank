@@ -1,6 +1,6 @@
 package am.armeniabank.walletserviceapi.request;
 
-import am.armeniabank.walletserviceapi.enums.NotificationType;
+import am.armeniabank.armeniabankcommon.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

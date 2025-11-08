@@ -1,6 +1,7 @@
 package am.armeniabank.walletservicesrc.exception;
 
-import am.armeniabank.walletserviceapi.response.RestErrorResponse;
+import am.armeniabank.armeniabankcommon.excepition.UserNotFoundException;
+import am.armeniabank.armeniabankcommon.response.RestErrorResponse;
 import am.armeniabank.walletservicesrc.exception.custom.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

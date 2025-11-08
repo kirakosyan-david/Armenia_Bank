@@ -1,13 +1,13 @@
 package am.armeniabank.transactionservicesrc.exception;
 
-import am.armeniabank.transactionserviceapi.response.RestErrorResponse;
+import am.armeniabank.armeniabankcommon.excepition.InsufficientFundsException;
+import am.armeniabank.armeniabankcommon.excepition.UserNotFoundException;
+import am.armeniabank.armeniabankcommon.response.RestErrorResponse;
 import am.armeniabank.transactionservicesrc.exception.custam.FreezeNotFoundException;
 import am.armeniabank.transactionservicesrc.exception.custam.FreezeOperationException;
-import am.armeniabank.transactionservicesrc.exception.custam.InsufficientFundsException;
 import am.armeniabank.transactionservicesrc.exception.custam.InvalidFreezeStateException;
 import am.armeniabank.transactionservicesrc.exception.custam.TransactionFailedException;
 import am.armeniabank.transactionservicesrc.exception.custam.TransactionNotFoundException;
-import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

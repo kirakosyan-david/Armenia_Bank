@@ -1,6 +1,6 @@
 package am.armeniabank.notificationservicesrc.config;
 
-import am.armeniabank.notificationservicesrc.kafka.event.AuditEvent;
+import am.armeniabank.armeniabankcommon.event.AuditEvent;
 import am.armeniabank.notificationservicesrc.kafka.event.NotificationEvent;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;

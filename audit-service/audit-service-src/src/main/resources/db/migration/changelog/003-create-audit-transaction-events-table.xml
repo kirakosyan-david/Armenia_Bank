@@ -4,9 +4,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet id="001-create-audit-wallets-table" author="David Kirakosyan">
+    <changeSet id="003-create-audit-transactions-table" author="David Kirakosyan">
         <sql>
-            CREATE TABLE audit_wallets (
+            CREATE TABLE audit_transactions (
                                          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                                          service VARCHAR(100) NOT NULL,
                                          transaction_id UUID,

@@ -1,13 +1,8 @@
 package am.armeniabank.walletservicesrc.integration;
 
-import am.armeniabank.walletserviceapi.enums.NotificationType;
-import am.armeniabank.walletserviceapi.request.AuditWalletEventRequest;
+import am.armeniabank.armeniabankcommon.enums.NotificationType;
 import am.armeniabank.walletserviceapi.request.NotificationRequest;
 import am.armeniabank.walletserviceapi.response.NotificationResponse;
-import am.armeniabank.walletserviceapi.response.UserResponse;
-import am.armeniabank.walletservicesrc.entity.Wallet;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.kafka.model;
 
-import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package am.armeniabank.walletservicesrc.integration;
 
+import am.armeniabank.armeniabankcommon.response.UserResponse;
 import am.armeniabank.walletserviceapi.request.AuditWalletEventRequest;
-import am.armeniabank.walletserviceapi.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

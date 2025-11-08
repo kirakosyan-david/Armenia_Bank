@@ -1,7 +1,7 @@
 package am.armeniabank.walletserviceapi.contract;
 
-import am.armeniabank.walletserviceapi.constants.ApiConstants;
-import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
 import am.armeniabank.walletserviceapi.response.WalletOperationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping(ApiConstants.WALLET_SERVICE_OPERATION_URL)
 @Validated
 @Tag(name = "Wallet Operation API", description = "Wallet Operation management API")
 public interface WalletOperationController {
@@ -35,7 +33,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "404", description = "Wallet not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{walletId}/credit")
+    @PutMapping(ApiConstants.WALLET_SERVICE_OPERATION_WALLET_ID_CREDIT_URL)
     ResponseEntity<WalletOperationResponse> credit(@PathVariable("walletId") @NotNull UUID walletId,
                                                    @Valid @RequestBody WalletOperationRequest reason);
 
@@ -49,7 +47,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "404", description = "Wallet not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{walletId}/debit")
+    @PutMapping(ApiConstants.WALLET_SERVICE_OPERATION_WALLET_ID_DEBIT_URL)
     ResponseEntity<WalletOperationResponse> debit(@PathVariable("walletId") @NotNull UUID walletId,
                                                   @Valid @RequestBody WalletOperationRequest reason);
 
@@ -63,7 +61,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "404", description = "Wallet not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{walletId}/freeze")
+    @PutMapping(ApiConstants.WALLET_SERVICE_OPERATION_WALLET_ID_FREEZE_URL)
     ResponseEntity<WalletOperationResponse> freeze(@PathVariable("walletId") @NotNull UUID walletId,
                                                    @Valid @RequestBody WalletOperationRequest reason);
 
@@ -77,7 +75,7 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "404", description = "Wallet not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{walletId}/unfreeze")
+    @PutMapping(ApiConstants.WALLET_SERVICE_OPERATION_WALLET_ID_UNFREEZE_URL)
     ResponseEntity<WalletOperationResponse> unfreeze(@PathVariable("walletId") @NotNull UUID walletId,
                                                      @Valid @RequestBody WalletOperationRequest reason);
 
@@ -91,6 +89,6 @@ public interface WalletOperationController {
             @ApiResponse(responseCode = "404", description = "Wallet not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{walletId}/operations")
+    @GetMapping(ApiConstants.WALLET_SERVICE_OPERATION_WALLET_ID_OPERATIONS_URL)
     ResponseEntity<List<WalletOperationResponse>> getOperations(@PathVariable("walletId") @NotNull UUID walletId);
 }

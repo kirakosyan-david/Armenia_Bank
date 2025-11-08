@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.config;
 
-import am.armeniabank.walletservicesrc.kafka.model.AuditEvent;
+import am.armeniabank.armeniabankcommon.event.AuditEvent;
 import am.armeniabank.walletservicesrc.kafka.model.NotificationEvent;
 import am.armeniabank.walletservicesrc.kafka.model.WalletEvent;
 import com.fasterxml.jackson.databind.JsonSerializer;

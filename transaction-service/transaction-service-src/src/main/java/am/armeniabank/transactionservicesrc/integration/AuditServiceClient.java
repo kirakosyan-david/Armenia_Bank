@@ -1,8 +1,8 @@
 package am.armeniabank.transactionservicesrc.integration;
 
 
+import am.armeniabank.armeniabankcommon.response.UserResponse;
 import am.armeniabank.transactionserviceapi.request.AuditTransactionEventRequest;
-import am.armeniabank.transactionserviceapi.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

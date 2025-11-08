@@ -1,6 +1,6 @@
 package am.armeniabank.auditserviceapi.contract;
 
-import am.armeniabank.auditserviceapi.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
 import am.armeniabank.auditserviceapi.request.AuditUserEventRequest;
 import am.armeniabank.auditserviceapi.response.AuditUserEventResponse;
 import org.springframework.http.HttpStatus;

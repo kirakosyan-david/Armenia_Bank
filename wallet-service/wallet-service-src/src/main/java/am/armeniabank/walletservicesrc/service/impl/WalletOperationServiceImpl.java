@@ -1,11 +1,11 @@
 package am.armeniabank.walletservicesrc.service.impl;
 
-import am.armeniabank.walletserviceapi.contract.UserApi;
+import am.armeniabank.armeniabankcommon.contract.UserApi;
+import am.armeniabank.armeniabankcommon.enums.WalletOperationType;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
+import am.armeniabank.armeniabankcommon.response.UserResponse;
 import am.armeniabank.walletserviceapi.enums.WalletOperationReason;
-import am.armeniabank.walletserviceapi.enums.WalletOperationType;
 import am.armeniabank.walletserviceapi.enums.WalletStatus;
-import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
-import am.armeniabank.walletserviceapi.response.UserResponse;
 import am.armeniabank.walletserviceapi.response.WalletOperationResponse;
 import am.armeniabank.walletservicesrc.entity.Wallet;
 import am.armeniabank.walletservicesrc.entity.WalletOperation;

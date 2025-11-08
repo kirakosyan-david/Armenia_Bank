@@ -1,6 +1,6 @@
 package am.armeniabank.authserviceapi.contract;
 
-import am.armeniabank.authserviceapi.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
 import am.armeniabank.authserviceapi.request.UserProfileRequest;
 import am.armeniabank.authserviceapi.request.UserProfileUpdateRequest;
 import am.armeniabank.authserviceapi.response.UserProfileResponse;
@@ -21,10 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
-import static am.armeniabank.authserviceapi.constants.RoleConstants.ADMIN;
-import static am.armeniabank.authserviceapi.constants.RoleConstants.USER;
+import static am.armeniabank.armeniabankcommon.constants.RoleConstants.ADMIN;
+import static am.armeniabank.armeniabankcommon.constants.RoleConstants.USER;
 
-@RequestMapping(ApiConstants.USER_SERVICE_PROFILE_URL)
 @Validated
 @SecurityRequirement(name = "keycloak")
 @Tag(name = "User Profile API", description = "API for managing user profiles")
@@ -39,7 +38,7 @@ public interface UserProfileController {
             @ApiResponse(responseCode = "403", description = "Insufficient access rights"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{userId}")
+    @PutMapping(ApiConstants.AUTH_SERVICE_USER_PROFILE_USER_ID_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<UserProfileResponse> saveUserProfile(@PathVariable("userId") UUID userId,
                                                         @Valid @RequestBody UserProfileRequest requestDto);
@@ -53,7 +52,7 @@ public interface UserProfileController {
             @ApiResponse(responseCode = "403", description = "Insufficient access rights"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/update/{userId}")
+    @PutMapping(ApiConstants.AUTH_SERVICE_USER_PROFILE_UPDATE_USER_ID_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<UserProfileResponse> updateUserProfile(@PathVariable("userId") UUID userId,
                                                           @Valid @RequestBody UserProfileUpdateRequest requestDto);
@@ -68,7 +67,7 @@ public interface UserProfileController {
             @ApiResponse(responseCode = "404", description = "User profile not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{userId}")
+    @GetMapping(ApiConstants.AUTH_SERVICE_USER_PROFILE_USER_ID_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable("userId") UUID userId);
 }

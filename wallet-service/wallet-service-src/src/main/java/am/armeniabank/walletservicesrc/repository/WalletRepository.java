@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.repository;
 
-import am.armeniabank.walletserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
 import am.armeniabank.walletservicesrc.entity.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 

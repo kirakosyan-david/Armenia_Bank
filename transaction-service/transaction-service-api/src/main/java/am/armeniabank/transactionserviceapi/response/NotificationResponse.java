@@ -1,7 +1,7 @@
 package am.armeniabank.transactionserviceapi.response;
 
-import am.armeniabank.transactionserviceapi.enums.Currency;
-import am.armeniabank.transactionserviceapi.enums.NotificationType;
+import am.armeniabank.armeniabankcommon.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.kafka.consumer.impl;
 
-import am.armeniabank.walletserviceapi.enums.WalletOperationType;
+import am.armeniabank.armeniabankcommon.enums.WalletOperationType;
 import am.armeniabank.walletservicesrc.handler.WalletEventHandler;
 import am.armeniabank.walletservicesrc.kafka.model.WalletEvent;
 import lombok.RequiredArgsConstructor;

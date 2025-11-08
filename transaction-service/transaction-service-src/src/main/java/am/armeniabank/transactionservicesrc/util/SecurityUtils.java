@@ -1,11 +1,10 @@
 package am.armeniabank.transactionservicesrc.util;
 
-import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
+import am.armeniabank.armeniabankcommon.excepition.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j

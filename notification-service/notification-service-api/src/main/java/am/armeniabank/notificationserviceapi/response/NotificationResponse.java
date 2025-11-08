@@ -1,7 +1,7 @@
 package am.armeniabank.notificationserviceapi.response;
 
-import am.armeniabank.notificationserviceapi.enums.Currency;
-import am.armeniabank.notificationserviceapi.enums.NotificationType;
+import am.armeniabank.armeniabankcommon.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +10,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter

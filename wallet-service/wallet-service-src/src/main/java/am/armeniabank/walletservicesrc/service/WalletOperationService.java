@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.service;
 
-import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
 import am.armeniabank.walletserviceapi.response.WalletOperationResponse;
 
 import java.util.List;

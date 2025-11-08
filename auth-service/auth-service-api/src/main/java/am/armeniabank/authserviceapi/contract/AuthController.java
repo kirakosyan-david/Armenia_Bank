@@ -1,6 +1,6 @@
 package am.armeniabank.authserviceapi.contract;
 
-import am.armeniabank.authserviceapi.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
 import am.armeniabank.authserviceapi.request.LoginRequest;
 import am.armeniabank.authserviceapi.request.RefreshTokenRequest;
 import am.armeniabank.authserviceapi.request.UserRegistrationRequest;
@@ -17,12 +17,10 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import static am.armeniabank.authserviceapi.constants.RoleConstants.ADMIN;
-import static am.armeniabank.authserviceapi.constants.RoleConstants.USER;
+import static am.armeniabank.armeniabankcommon.constants.RoleConstants.ADMIN;
+import static am.armeniabank.armeniabankcommon.constants.RoleConstants.USER;
 
-@RequestMapping(ApiConstants.USER_SERVICE_URL)
 @Validated
 @SecurityRequirement(name = "keycloak")
 @Tag(name = "Auth API", description = "API for authentication and user management")
@@ -37,7 +35,7 @@ public interface AuthController {
             @ApiResponse(responseCode = "403", description = "Insufficient access rights"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/register")
+    @PostMapping(ApiConstants.AUTH_SERVICE_REGISTER_URL)
     ResponseEntity<UserDto> register(@Valid @RequestBody UserRegistrationRequest register);
 
     @Operation(summary = "User login",
@@ -49,7 +47,7 @@ public interface AuthController {
             @ApiResponse(responseCode = "403", description = "Insufficient access rights"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/login")
+    @PostMapping(ApiConstants.AUTH_SERVICE_LOGIN_URL)
     ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest login);
 
     @Operation(summary = "User logout",
@@ -61,7 +59,7 @@ public interface AuthController {
             @ApiResponse(responseCode = "403", description = "Insufficient access rights"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/logout")
+    @PostMapping(ApiConstants.AUTH_SERVICE_LOGOUT_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest refreshToken);
 
@@ -74,7 +72,7 @@ public interface AuthController {
             @ApiResponse(responseCode = "403", description = "Insufficient access rights"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/refresh")
+    @PostMapping(ApiConstants.AUTH_SERVICE_REFRESH_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<String> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshToken);
 

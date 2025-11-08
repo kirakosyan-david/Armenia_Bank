@@ -1,6 +1,6 @@
 package am.armeniabank.transactionservicesrc.kafka.model;
 
-import am.armeniabank.transactionserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

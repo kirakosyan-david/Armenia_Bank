@@ -1,9 +1,9 @@
 package am.armeniabank.walletservicesrc.controller.impl;
 
+import am.armeniabank.armeniabankcommon.controller.BaseController;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
 import am.armeniabank.walletserviceapi.contract.WalletOperationController;
-import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
 import am.armeniabank.walletserviceapi.response.WalletOperationResponse;
-import am.armeniabank.walletservicesrc.controller.BaseController;
 import am.armeniabank.walletservicesrc.service.WalletOperationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

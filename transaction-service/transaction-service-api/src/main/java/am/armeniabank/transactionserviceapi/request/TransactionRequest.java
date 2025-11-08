@@ -1,6 +1,6 @@
 package am.armeniabank.transactionserviceapi.request;
 
-import am.armeniabank.transactionserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
 import am.armeniabank.transactionserviceapi.enums.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

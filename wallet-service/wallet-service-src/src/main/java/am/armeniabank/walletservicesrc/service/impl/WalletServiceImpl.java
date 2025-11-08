@@ -1,9 +1,9 @@
 package am.armeniabank.walletservicesrc.service.impl;
 
-import am.armeniabank.walletserviceapi.contract.UserApi;
-import am.armeniabank.walletserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.contract.UserApi;
+import am.armeniabank.armeniabankcommon.enums.Currency;
+import am.armeniabank.armeniabankcommon.response.UserResponse;
 import am.armeniabank.walletserviceapi.enums.WalletStatus;
-import am.armeniabank.walletserviceapi.response.UserResponse;
 import am.armeniabank.walletserviceapi.response.WalletResponse;
 import am.armeniabank.walletservicesrc.entity.Wallet;
 import am.armeniabank.walletservicesrc.exception.custom.WalletAlreadyExistsException;

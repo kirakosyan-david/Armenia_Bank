@@ -1,6 +1,6 @@
 package am.armeniabank.notificationserviceapi.contract;
 
-import am.armeniabank.notificationserviceapi.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
 import am.armeniabank.notificationserviceapi.request.NotificationRequest;
 import am.armeniabank.notificationserviceapi.response.NotificationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,7 @@ public interface NotificationController {
             @ApiResponse(responseCode = "409", description = "Notification already exists for user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/message")
+    @PostMapping(ApiConstants.NOTIFICATION_SERVICE_MESSAGE_URL)
     ResponseEntity<NotificationResponse> createNotification(@RequestBody @NotNull NotificationRequest notification);
 
 
@@ -46,7 +46,7 @@ public interface NotificationController {
             @ApiResponse(responseCode = "409", description = "Notification already exists for user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping
+    @PostMapping(ApiConstants.NOTIFICATION_SERVICE_URL)
     ResponseEntity<NotificationResponse> sendNotification(@RequestBody @NotNull NotificationRequest notification);
 
     @Operation(summary = "Get notification by ID",
@@ -55,6 +55,6 @@ public interface NotificationController {
             @ApiResponse(responseCode = "200", description = "Notification retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Notification not found")
     })
-    @GetMapping
+    @GetMapping(ApiConstants.NOTIFICATION_SERVICE_URL)
     ResponseEntity<List<NotificationResponse>> getNotificationByUserId();
 }

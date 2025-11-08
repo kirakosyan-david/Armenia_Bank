@@ -1,5 +1,6 @@
 package am.armeniabank.transactionservicesrc.service.impl;
 
+import am.armeniabank.armeniabankcommon.excepition.UserNotFoundException;
 import am.armeniabank.transactionserviceapi.enums.FreezeStatus;
 import am.armeniabank.transactionserviceapi.response.FreezeResponse;
 import am.armeniabank.transactionservicesrc.entity.Freeze;
@@ -7,7 +8,6 @@ import am.armeniabank.transactionservicesrc.entity.Transaction;
 import am.armeniabank.transactionservicesrc.exception.custam.FreezeNotFoundException;
 import am.armeniabank.transactionservicesrc.exception.custam.FreezeOperationException;
 import am.armeniabank.transactionservicesrc.exception.custam.InvalidFreezeStateException;
-import am.armeniabank.transactionservicesrc.exception.custam.UserNotFoundException;
 import am.armeniabank.transactionservicesrc.kafka.model.FreezeEvent;
 import am.armeniabank.transactionservicesrc.mapper.FreezeMapper;
 import am.armeniabank.transactionservicesrc.repository.FreezeRepository;

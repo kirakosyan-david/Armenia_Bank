@@ -76,6 +76,9 @@ audit-service:
 notification-service:
   url: http://notification-service:8085
 
+wallet-service:
+  url: http://wallet-service:8083
+
 auth-service:
   url: http://auth-service:8081
 

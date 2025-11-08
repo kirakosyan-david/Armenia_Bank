@@ -1,7 +1,7 @@
 package am.armeniabank.notificationservicesrc.entity;
 
-import am.armeniabank.notificationserviceapi.enums.Currency;
-import am.armeniabank.notificationserviceapi.enums.NotificationType;
+import am.armeniabank.armeniabankcommon.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.NotificationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

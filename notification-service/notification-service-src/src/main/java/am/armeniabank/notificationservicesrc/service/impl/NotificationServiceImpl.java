@@ -1,9 +1,9 @@
 package am.armeniabank.notificationservicesrc.service.impl;
 
-import am.armeniabank.notificationserviceapi.contract.UserApi;
+import am.armeniabank.armeniabankcommon.contract.UserApi;
+import am.armeniabank.armeniabankcommon.response.UserResponse;
 import am.armeniabank.notificationserviceapi.request.NotificationRequest;
 import am.armeniabank.notificationserviceapi.response.NotificationResponse;
-import am.armeniabank.notificationserviceapi.response.UserResponse;
 import am.armeniabank.notificationservicesrc.entity.Notification;
 import am.armeniabank.notificationservicesrc.mapper.NotificationMapper;
 import am.armeniabank.notificationservicesrc.repository.NotificationRepository;

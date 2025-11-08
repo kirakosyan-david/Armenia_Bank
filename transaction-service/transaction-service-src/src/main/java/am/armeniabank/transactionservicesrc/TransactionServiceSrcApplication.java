@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication(exclude = KafkaAutoConfiguration.class)
-@EnableFeignClients(basePackages = "am.armeniabank.transactionserviceapi.contract")
+@EnableFeignClients(basePackages = "am.armeniabank.armeniabankcommon.contract")
 public class TransactionServiceSrcApplication {
 
     public static void main(String[] args) {

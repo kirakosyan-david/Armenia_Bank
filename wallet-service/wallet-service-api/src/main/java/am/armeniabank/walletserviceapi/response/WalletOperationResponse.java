@@ -1,8 +1,8 @@
 package am.armeniabank.walletserviceapi.response;
 
-import am.armeniabank.walletserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.WalletOperationType;
 import am.armeniabank.walletserviceapi.enums.WalletOperationReason;
-import am.armeniabank.walletserviceapi.enums.WalletOperationType;
 import am.armeniabank.walletserviceapi.enums.WalletStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

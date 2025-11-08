@@ -1,7 +1,7 @@
 package am.armeniabank.walletservicesrc.kafka.consumer.impl;
 
-import am.armeniabank.walletservicesrc.kafka.consumer.EventConsumer;
-import am.armeniabank.walletservicesrc.kafka.model.AuditEvent;
+import am.armeniabank.armeniabankcommon.event.AuditEvent;
+import am.armeniabank.armeniabankcommon.kafka.consumer.EventConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;

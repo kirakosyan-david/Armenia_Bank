@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.entity;
 
-import am.armeniabank.walletserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
 import am.armeniabank.walletserviceapi.enums.WalletStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

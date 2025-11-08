@@ -1,5 +1,6 @@
 package am.armeniabank.authservicesrc.integration;
 
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
 import am.armeniabank.authservicesrc.exception.custom.UserServerError;
 import am.armeniabank.authservicesrc.kafka.model.AuditEvent;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class AuditServiceClient {
     private String auditServiceUrl;
 
     public void sendAuditEvent(AuditEvent event) {
-        String url = auditServiceUrl + "/api/audit/user";
+        String url = auditServiceUrl + ApiConstants.AUDIT_USER_SERVICE_URL;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

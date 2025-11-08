@@ -1,9 +1,9 @@
 package am.armeniabank.transactionserviceapi.contract;
 
-import am.armeniabank.transactionserviceapi.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.response.ListResponse;
 import am.armeniabank.transactionserviceapi.request.TransactionRequest;
 import am.armeniabank.transactionserviceapi.response.FreezeResponse;
-import am.armeniabank.transactionserviceapi.response.ListResponse;
 import am.armeniabank.transactionserviceapi.response.TransactionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,12 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping(ApiConstants.TRANSACTION_SERVICE_URL)
 @Validated
 @Tag(name = "Transaction API", description = "Transaction management API")
 public interface TransactionController {
@@ -36,7 +34,7 @@ public interface TransactionController {
             @ApiResponse(responseCode = "409", description = "Transaction already exists for user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping
+    @PostMapping(ApiConstants.TRANSACTION_SERVICE_URL)
     ResponseEntity<TransactionResponse> createTransaction(@RequestBody TransactionRequest request);
 
     @Operation(summary = "Complete transaction",
@@ -49,7 +47,7 @@ public interface TransactionController {
             @ApiResponse(responseCode = "404", description = "Transaction not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{transactionId}/complete")
+    @PutMapping(ApiConstants.TRANSACTION_SERVICE_TRANSACTION_ID_COMPLETE_URL)
     ResponseEntity<TransactionResponse> completeTransaction(@PathVariable("transactionId") UUID transactionId);
 
 
@@ -63,7 +61,7 @@ public interface TransactionController {
             @ApiResponse(responseCode = "404", description = "Transaction not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{transactionId}/cancel")
+    @PutMapping(ApiConstants.TRANSACTION_SERVICE_TRANSACTION_ID_CANCEL_URL)
     ResponseEntity<TransactionResponse> cancelTransaction(@PathVariable("transactionId") UUID transactionId);
 
 
@@ -77,7 +75,7 @@ public interface TransactionController {
             @ApiResponse(responseCode = "404", description = "Transaction not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{transactionId}/fail")
+    @PutMapping(ApiConstants.TRANSACTION_SERVICE_TRANSACTION_ID_FAIL_URL)
     ResponseEntity<TransactionResponse> failTransaction(@PathVariable("transactionId") UUID transactionId);
 
 
@@ -91,7 +89,7 @@ public interface TransactionController {
             @ApiResponse(responseCode = "404", description = "Transaction not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{transactionId}")
+    @GetMapping(ApiConstants.TRANSACTION_SERVICE_TRANSACTION_ID_URL)
     ResponseEntity<TransactionResponse> getTransactionById(@PathVariable("transactionId") UUID transactionId);
 
 
@@ -105,7 +103,7 @@ public interface TransactionController {
             @ApiResponse(responseCode = "404", description = "Wallet not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/wallet/{walletId}")
+    @GetMapping(ApiConstants.TRANSACTION_SERVICE_WALLET_WALLET_ID_URL)
     ResponseEntity<List<TransactionResponse>> getTransactionsByWallet(@PathVariable("walletId") UUID walletId);
 
     @Operation(summary = "Get active freezes for a wallet",
@@ -118,6 +116,6 @@ public interface TransactionController {
             @ApiResponse(responseCode = "404", description = "No active freezes found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/freezes/active")
+    @GetMapping(ApiConstants.TRANSACTION_SERVICE_FREEZES_ACTIVE_URL)
     ResponseEntity<ListResponse<FreezeResponse>> getActiveFreezes();
 }

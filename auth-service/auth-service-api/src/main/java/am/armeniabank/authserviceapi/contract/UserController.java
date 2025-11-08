@@ -1,6 +1,6 @@
 package am.armeniabank.authserviceapi.contract;
 
-import am.armeniabank.authserviceapi.constants.ApiConstants;
+import am.armeniabank.armeniabankcommon.constants.ApiConstants;
 import am.armeniabank.authserviceapi.request.UserUpdateRequest;
 import am.armeniabank.authserviceapi.response.UpdateUserResponse;
 import am.armeniabank.authserviceapi.response.UserEmailSearchResponse;
@@ -18,16 +18,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 import java.util.UUID;
 
-import static am.armeniabank.authserviceapi.constants.RoleConstants.ADMIN;
-import static am.armeniabank.authserviceapi.constants.RoleConstants.USER;
+import static am.armeniabank.armeniabankcommon.constants.RoleConstants.ADMIN;
+import static am.armeniabank.armeniabankcommon.constants.RoleConstants.USER;
 
-@RequestMapping(ApiConstants.USER_SERVICE_URL)
 @Validated
 @SecurityRequirement(name = "keycloak")
 @Tag(name = "User API", description = "User management API")
@@ -42,7 +40,7 @@ public interface UserController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/search")
+    @GetMapping(ApiConstants.AUTH_SERVICE_SEARCH_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<UserEmailSearchResponse> searchEmail(@RequestParam String email);
 
@@ -56,7 +54,7 @@ public interface UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{id}")
+    @GetMapping(ApiConstants.AUTH_SERVICE_USER_BY_ID_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<UserResponse> findUserById(@PathVariable UUID id);
 
@@ -70,7 +68,7 @@ public interface UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/update/{id}")
+    @PutMapping(ApiConstants.AUTH_SERVICE_USER_UPDATE_URL)
     @Secured({ADMIN, USER})
     ResponseEntity<UpdateUserResponse> updateUser(@PathVariable UUID id, @RequestBody UserUpdateRequest request);
 
@@ -84,8 +82,8 @@ public interface UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @DeleteMapping("/delete/{userId}")
+    @DeleteMapping(ApiConstants.AUTH_SERVICE_USER_DELETE_URL)
     @Secured({ADMIN, USER})
-    ResponseEntity<Map<String, String>> deleteUser(@PathVariable UUID userId);
+    ResponseEntity<Map<String, String>> deleteUser(@PathVariable UUID id);
 
 }

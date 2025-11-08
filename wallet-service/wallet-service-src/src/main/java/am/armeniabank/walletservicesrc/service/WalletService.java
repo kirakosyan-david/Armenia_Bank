@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.service;
 
-import am.armeniabank.walletserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
 import am.armeniabank.walletserviceapi.response.WalletResponse;
 
 import java.util.List;

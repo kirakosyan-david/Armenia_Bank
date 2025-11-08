@@ -1,7 +1,7 @@
 package am.armeniabank.walletservicesrc.entity;
 
+import am.armeniabank.armeniabankcommon.enums.WalletOperationType;
 import am.armeniabank.walletserviceapi.enums.WalletOperationReason;
-import am.armeniabank.walletserviceapi.enums.WalletOperationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

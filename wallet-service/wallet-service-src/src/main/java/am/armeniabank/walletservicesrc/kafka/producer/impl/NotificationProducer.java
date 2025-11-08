@@ -1,7 +1,7 @@
 package am.armeniabank.walletservicesrc.kafka.producer.impl;
 
+import am.armeniabank.armeniabankcommon.kafka.producer.EventProducer;
 import am.armeniabank.walletservicesrc.kafka.model.NotificationEvent;
-import am.armeniabank.walletservicesrc.kafka.producer.EventProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

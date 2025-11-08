@@ -1,7 +1,7 @@
 package am.armeniabank.walletservicesrc.handler.impl;
 
-import am.armeniabank.walletserviceapi.enums.WalletOperationType;
-import am.armeniabank.walletserviceapi.request.WalletOperationRequest;
+import am.armeniabank.armeniabankcommon.enums.WalletOperationType;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
 import am.armeniabank.walletservicesrc.handler.WalletEventHandler;
 import am.armeniabank.walletservicesrc.service.WalletOperationService;
 import lombok.RequiredArgsConstructor;

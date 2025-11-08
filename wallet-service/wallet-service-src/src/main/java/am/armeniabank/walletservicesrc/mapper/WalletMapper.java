@@ -1,6 +1,6 @@
 package am.armeniabank.walletservicesrc.mapper;
 
-import am.armeniabank.walletserviceapi.response.UserResponse;
+import am.armeniabank.armeniabankcommon.response.UserResponse;
 import am.armeniabank.walletserviceapi.response.WalletResponse;
 import am.armeniabank.walletservicesrc.entity.Wallet;
 import org.mapstruct.Mapper;

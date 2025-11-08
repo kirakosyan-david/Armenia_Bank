@@ -1,6 +1,6 @@
 package am.armeniabank.authservicesrc.exception;
 
-import am.armeniabank.authserviceapi.response.RestErrorResponse;
+import am.armeniabank.armeniabankcommon.response.RestErrorResponse;
 import am.armeniabank.authservicesrc.exception.custom.ChangePasswordException;
 import am.armeniabank.authservicesrc.exception.custom.DeleteNotFoundException;
 import am.armeniabank.authservicesrc.exception.custom.EmailAlreadyExistsException;

@@ -1,6 +1,6 @@
 package am.armeniabank.transactionservicesrc.entity;
 
-import am.armeniabank.transactionserviceapi.enums.Currency;
+import am.armeniabank.armeniabankcommon.enums.Currency;
 import am.armeniabank.transactionserviceapi.enums.TransactionState;
 import am.armeniabank.transactionserviceapi.enums.TransactionType;
 import com.fasterxml.jackson.annotation.JsonManagedReference;

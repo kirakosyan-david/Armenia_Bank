@@ -1,15 +1,13 @@
 package am.armeniabank.transactionservicesrc.service.impl;
 
-import am.armeniabank.transactionserviceapi.contract.WalletApi;
-import am.armeniabank.transactionserviceapi.enums.WalletOperationType;
+import am.armeniabank.armeniabankcommon.contract.WalletApi;
+import am.armeniabank.armeniabankcommon.enums.WalletOperationType;
+import am.armeniabank.armeniabankcommon.request.WalletOperationRequest;
 import am.armeniabank.transactionserviceapi.request.TransactionRequest;
-import am.armeniabank.transactionserviceapi.request.WalletOperationRequest;
 import am.armeniabank.transactionservicesrc.entity.Transaction;
 import am.armeniabank.transactionservicesrc.service.WalletTransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
