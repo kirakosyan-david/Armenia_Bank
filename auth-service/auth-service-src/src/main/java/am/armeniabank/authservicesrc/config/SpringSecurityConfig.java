@@ -27,12 +27,13 @@ public class SpringSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/actuator/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/oauth2-redirect.html",
-                                "/api/users/register",
-                                "/api/users/login",
+                                "/api/register",
+                                "/api/login",
                                 "/api/verify/email",
                                 "/api/verify/email/update")
                         .permitAll()

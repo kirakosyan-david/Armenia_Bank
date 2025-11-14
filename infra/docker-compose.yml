@@ -14,6 +14,11 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -23,9 +28,14 @@ services:
     restart: always
     environment:
       REDIS_PASSWORD: armenia_bank
-    command: [ "redis-server", "--requirepass", "armenia_bank" ]
+    command: ["redis-server", "--requirepass", "armenia_bank"]
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "armenia_bank", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
@@ -37,6 +47,11 @@ services:
       - "2181:2181"
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.3.0
@@ -55,6 +70,12 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   kafka-init:
     image: confluentinc/cp-kafka:7.3.0
@@ -68,8 +89,7 @@ services:
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic audit-events --replication-factor 1 --partitions 1;
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic auth-events --replication-factor 1 --partitions 1;
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic gateway-topic --replication-factor 1 --partitions 1;
-      echo 'Done.';
-      "
+      echo 'Done.';"
     networks:
       - my-network
 
@@ -80,24 +100,30 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - JAVA_OPTS=-Dorg.keycloak=DEBUG -Dorg.keycloak.events=DEBUG
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      JAVA_OPTS: "-Dorg.keycloak=DEBUG -Dorg.keycloak.events=DEBUG"
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
       - keycloak-data:/opt/keycloak/data
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend-keycloak-auth:8080/realms/ArmeniaBank || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   backend-gateway-client:
     build:
       context: ../gateway-service
+      dockerfile: Dockerfile
     container_name: backend-gateway-client
     depends_on:
       - backend-keycloak-auth
       - auth-service
     ports:
-      - "9090:9090"
+      - "9091:9091"
     volumes:
       - ../log_armenia_bank:/logs
     networks:
@@ -106,6 +132,7 @@ services:
   auth-service:
     build:
       context: ../auth-service
+      dockerfile: Dockerfile
     container_name: auth-service
     depends_on:
       - redis
@@ -125,10 +152,16 @@ services:
       - ../log_armenia_bank:/logs
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend-keycloak-auth:8080/realms/ArmeniaBank || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   audit-service:
     build:
       context: ../audit-service
+      dockerfile: Dockerfile
     container_name: audit-service
     depends_on:
       - postgres
@@ -141,20 +174,20 @@ services:
       SPRING_DATASOURCE_PASSWORD: audit_service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC_AUDIT_EVENTS: audit-events
-    healthcheck:
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
     volumes:
       - ../log_armenia_bank:/logs
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend-keycloak-auth:8080/realms/ArmeniaBank || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   wallet-service:
     build:
       context: ../wallet-service
+      dockerfile: Dockerfile
     container_name: wallet-service
     depends_on:
       - postgres
@@ -166,20 +199,20 @@ services:
       SPRING_DATASOURCE_USERNAME: wallet_service
       SPRING_DATASOURCE_PASSWORD: wallet_service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    healthcheck:
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
     volumes:
       - ../log_armenia_bank:/logs
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend-keycloak-auth:8080/realms/ArmeniaBank || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   transaction-service:
     build:
       context: ../transaction-service
+      dockerfile: Dockerfile
     container_name: transaction-service
     depends_on:
       - postgres
@@ -191,20 +224,20 @@ services:
       SPRING_DATASOURCE_USERNAME: transaction_service
       SPRING_DATASOURCE_PASSWORD: transaction_service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    healthcheck:
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
     volumes:
       - ../log_armenia_bank:/logs
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend-keycloak-auth:8080/realms/ArmeniaBank || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   notification-service:
     build:
       context: ../notification-service
+      dockerfile: Dockerfile
     container_name: notification-service
     depends_on:
       - postgres
@@ -216,17 +249,15 @@ services:
       SPRING_DATASOURCE_USERNAME: notification_service
       SPRING_DATASOURCE_PASSWORD: notification_service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    healthcheck:
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
     volumes:
       - ../log_armenia_bank:/logs
     networks:
       - my-network
-
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend-keycloak-auth:8080/realms/ArmeniaBank || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
 volumes:
   keycloak-data:

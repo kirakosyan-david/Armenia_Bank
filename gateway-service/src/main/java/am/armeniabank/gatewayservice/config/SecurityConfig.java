@@ -14,13 +14,22 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/api/health", "/api/info").permitAll()
+                        .pathMatchers("/api/register", "/api/login").permitAll()
+                        .pathMatchers("/api/users/**").authenticated()
+                        .pathMatchers("/api/resources/**").authenticated()
+                        .pathMatchers("/api/audit/**").authenticated()
+                        .pathMatchers("/api/wallets/**").authenticated()
+                        .pathMatchers("/api/notifications/**").authenticated()
+                        .pathMatchers("/api/transactions/**").authenticated()
                         .anyExchange().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())
-                .oauth2Client(Customizer.withDefaults());
+                .oauth2Client(Customizer.withDefaults())
+                .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt);
         return http.build();
     }
-
 }

@@ -41,9 +41,15 @@
 	<dependencies>
 
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+
+		<dependency>
 			<groupId>com.github.kirakosyan-david</groupId>
 			<artifactId>armenia-bank-common</artifactId>
-			<version>v0.0.7</version>
+			<version>v0.0.8</version>
 		</dependency>
 
 		<dependency>
