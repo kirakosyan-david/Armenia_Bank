@@ -10,7 +10,7 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "http://localhost:3000"
+            allowedOriginPatterns: "*"
             allowedHeaders: "*"
             allowedMethods:
               - GET
@@ -99,6 +99,45 @@ spring:
           filters:
             - StripPrefix=0
             - TokenRelay
+
+        - id: template-login
+          uri: http://template-service:8086
+          predicates:
+            - Path=/template/login,/favicon.ico
+          filters:
+            - StripPrefix=0
+            - RemoveRequestHeader=Cookie
+
+        - id: template-register
+          uri: http://template-service:8086
+          predicates:
+            - Path=/template/register,/favicon.ico
+          filters:
+            - StripPrefix=0
+            - RemoveRequestHeader=Cookie
+
+        - id: template-service
+          uri: http://template-service:8086
+          predicates:
+            - Path=/template/home,/favicon.ico
+          filters:
+            - StripPrefix=0
+            - RemoveRequestHeader=Cookie
+
+        - id: template-static
+          uri: http://template-service:8086
+          predicates:
+            - Path=/assets/**,/assets/css/**,/assets/js/**,/assets/images/**,/assets/webfonts/**
+          filters:
+            - StripPrefix=0
+
+#        - id: template-service
+#          uri: http://template-service:8086
+#          predicates:
+#            - Path=/templates/**
+#          filters:
+#            - StripPrefix=1
+
 
   security:
     oauth2:

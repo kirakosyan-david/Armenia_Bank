@@ -72,6 +72,23 @@
         "access.token.lifespan": "300",
         "refresh.token.lifespan": "1800"
       }
+    },
+    {
+      "clientId": "template-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "template-service",
+      "redirectUris": [],
+      "webOrigins": ["+"],
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "attributes": {
+        "access.token.lifespan": "300",
+        "refresh.token.lifespan": "1800"
+      }
     }
   ],
   "roles": {
